@@ -24,7 +24,7 @@
 /*
 ### FILE ATACHMENTS ###
 This is an alpha feature with some known bugs (see todo.txt). It could changed in a future release without backward compatibility! */
-define('USER_CONVERSATIONS_ATTACHMENTS', true);
+define('USER_CONVERSATIONS_ATTACHMENTS', false);
 
 
 // register model-file
