@@ -1,0 +1,141 @@
+OC.Conversations = {
+
+	LoadConversation : function() {		
+		$.post(OC.filePath('conversations', 'ajax', 'fetchConversation.php'), {
+			room : $("#new-comment").attr("data-room"),			
+        }, function(jsondata) {
+            if(jsondata.status == 'success') {
+                $("#conversation").html(jsondata.data.conversation);
+                //OC.dialogs.alert(jsondata.data.message, jsondata.data.title );
+            }
+        }, 'json');
+	},
+
+	NewComment : function(comment, attachment) {
+		$.post(OC.filePath('conversations', 'ajax', 'newComment.php'), {
+            comment : comment ,
+            attachment : attachment
+        }, function(jsondata) {
+            if(jsondata.status == 'success') {
+                OC.Conversations.LoadConversation();
+            }
+        }, 'json');
+	},
+
+	polling : function() {
+		$.post(OC.filePath('conversations', 'ajax', 'polling.php'), {
+        }, function(jsondata) {
+            if(jsondata.status == 'success') {
+            	for ( var room in jsondata.data.update) {
+            		if ( room ==  $("#new-comment").attr("data-room") ) {
+            			// new msgs in room
+            			OC.Conversations.LoadConversation();
+            		} else {
+            			// new msgs in other room
+            			$("#rooms-list input[value=" + room + "]").addClass('new-msg');
+            		}
+            	}
+            }
+        }, 'json');
+	},
+
+	AddAttachment : function(path) {
+		$("#new-comment-attachment").show();
+		$("#add-attachment").hide();
+		$.post(OC.filePath('conversations', 'ajax', 'attachmentPreview.php'), {
+			path : path
+		}, function(jsondata) {
+			if (jsondata.status == 'success') {
+				$("#new-comment-attachment").attr('data-attachment', jsondata.data.data);
+				$("#new-comment-attachment").html('<a class="oc-dialog-close svg">&nbsp;&nbsp;</a>' + jsondata.data.preview);
+				$("#new-comment-attachment .oc-dialog-close").click(function() { OC.Conversations.RemoveAttachmentPreview(); }); 	
+			}
+		}, 'json');
+	},
+
+	RemoveAttachmentPreview : function() {		
+		$("#new-comment-attachment").hide();
+		$("#new-comment-attachment").html("");
+		$("#new-comment-attachment").attr("data-attachment", "");
+		$("#add-attachment").show();
+	}
+}
+
+$(document).ready(function(){
+
+	// positioning app-content if rooms-list 
+	if ( $("#controls").length ) {
+		// prevent window scrollbar
+		$("#content").css('height', ($("#content").height()-50) + 'px');
+		$("#app-content").css('top', '44px');
+	}
+
+	// active buttonbar and submit
+	$("#new-comment-text").click(function(event) {
+		$("#new-comment-text").css("border-width", "1px");
+		$("#new-comment-buttons").show();
+		$("#new-comment input[type=submit]").removeAttr( 'disabled' );		
+	});
+	// texteare autosize
+	$("#new-comment-text").autosize();
+
+	// select room
+	$("#rooms-list .room").click(function(event) {
+		var room = $(this).val();
+
+		$("#rooms-list input").removeClass('active new-msg');
+		$(this).addClass('active');
+
+		$("#new-comment").attr("data-room", room);
+
+		OC.Conversations.LoadConversation();		
+	});
+
+	// submit new commnt
+	$("#new-comment").submit(function(event) {
+		var comment = $("#new-comment-text").val().trim();
+		var attachment = $("#new-comment-attachment").attr("data-attachment");		
+		
+		OC.Conversations.NewComment(comment, attachment);
+		
+		$("#new-comment-text").val("");
+		$("#new-comment-text").height("55px");
+		OC.Conversations.RemoveAttachmentPreview();
+		event.preventDefault();
+	});
+
+	// add attachment
+	$('#add-attachment').click(function(){
+		OC.dialogs.filepicker(t('conversations', 'Select file'),OC.Conversations.AddAttachment, false, [], true);
+	});	
+	
+
+	// infinite scrolling
+	var $container = $('#conversation');
+
+	$container.infinitescroll({
+		navSelector  : '#page-nav',    // selector for the paged navigation
+		nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
+		itemSelector : '.comment',     // selector for all items you'll retrieve
+		pixelsFromNavToBottom: 150,
+		extraScrollPx: 50,
+		prefill: true,
+		path : function(page){
+			var room = $("#new-comment").attr("data-room");
+			return OC.filePath('conversations', 'ajax', 'fetchConversation.php') + '?page=' + page + '&room=' + room;
+		},
+		loading: {
+			finishedMsg: t('conversations', 'No more comments to load'),
+			msgText: t('conversations', 'Loading older comments'),
+			img: OC.filePath('core', 'img', 'loading-dark.gif') 
+		}
+	},       
+    function( nextComments ) {
+		var $nextComm = $( nextComments );
+		$container.append($nextComm);
+	});
+
+	// polling interval
+	setInterval( function(){ OC.Conversations.polling(); }, 5000);
+
+});

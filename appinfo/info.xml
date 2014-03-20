@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<info>
+	<id>conversations</id>
+	<name>User Conversations</name>
+	<description>A simple app for conversations between owncloud users and groups.</description>
+	<version>0.1</version>
+	<licence>AGPL</licence>
+	<author>Simeon Ackermann</author>
+	<require>6</require>
+</info>

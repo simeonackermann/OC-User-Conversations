@@ -1,0 +1,149 @@
+#app-content {	
+	position: relative;	
+	width: 80%;
+	height: auto;
+	max-width: 800px;
+	margin: 0px 0px 0px 40px;
+	padding: 0px 40px 0px 40px;		
+}
+#rooms-list {
+	padding: 0px 15px 0px 20px;
+}
+#rooms-list label {
+	font-weight: bold;
+	margin-right: 5px;
+	color: #555;
+}
+#rooms-list input {
+	padding: 0 20px;
+	height: 44px;
+	border: none;
+	border-right: 1px solid rgba(190, 190, 190, 0.898);
+	border-left: 1px solid rgba(190, 190, 190, 0.898);
+	margin: 0;
+	margin-left: -1px;
+	border-radius: 0;
+	text-transform: uppercase;	
+}
+#rooms-list .active {
+	background: #ccc;	
+}
+#rooms-list .new-msg {
+	background-image: url('%appswebroot%/conversations/img/blink.gif');
+}
+
+#new-comment {	
+	width:70%; 
+	border:1px solid #ccc;
+	margin: 7px 0 10px 0;
+}
+@media all and (max-width: 620px) {
+	#new-comment {
+		width: 100%;
+	}
+}
+#new-comment-text {
+	width:100%;
+	height: 55px;
+	text-align: left;
+	border: none;
+	border-bottom: 0px dashed #ccc;	
+	border-radius: 0;
+	margin:0;
+	display:block;
+	box-sizing:border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	overflow:auto;
+	resize:none;	
+}
+#new-comment-buttons {
+	width:100%; 
+	box-sizing:border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	padding:5px;
+}
+#new-comment input[type=submit] {
+	float: right;
+}
+#add-attachment {
+	margin: 10px 0 0 0;
+	opacity: 0.5;
+	float: left;
+}
+#add-attachment:hover {
+	opacity: 1;
+}
+#new-comment-attachment {
+	border-bottom: 1px dotted #ccc;
+	margin-bottom: 5px;
+}
+#new-comment-attachment img {
+	margin: 0 5px -16px 0px;
+}
+#new-comment-attachment .oc-dialog-close {
+	position: relative;
+	top: 0px;
+	right: 0px;
+}
+#new-comment-attachment p {
+	color: #ccc;
+	margin: 10px 5px;
+}
+.comment {
+	margin-bottom: 15px;
+}
+
+.comment-header {
+	height: 32px;
+	background-color: #DCDCDC;
+	padding: 5px;
+	border-radius: 3px;
+}
+
+.comment-header .avatar {
+	float: left;
+}
+.comment-header .author {
+	float: left;
+	font-weight: bold;
+	vertical-align: baseline;
+	padding: 5px 0 0 5px;
+}
+
+.comment-header .date {
+	float: right;
+	color: gray;
+	padding: 5px 0 0 5px;
+}
+
+.comment-text {
+	clear: both;
+	padding: 10px;
+}
+.comment-attachment {
+	clear: both;
+	padding: 10px;
+}
+.comment-attachment img {
+	margin: 0 5px -14px 0px;
+}
+
+#new-comment-attachment .oc-dialog-close {
+	float: right;
+}
+
+#infscr-loading { 
+	background: #000000;
+	border-radius: 10px;
+	bottom: 40px;
+	color: #FFFFFF;
+	left: 45%;
+	opacity: 0.8;
+	padding: 10px;
+	position: fixed;
+	text-align: center;
+	width: 200px;
+	z-index: 100;
+}
