@@ -22,13 +22,24 @@
 */
 
 /*
-### FILE ATACHMENTS ###
+### CONFIG ###
+----------------------------------------------------- */
+/* User can delete own posts, admin can delete all */
+define('USER_CONVERSATIONS_CAN_DELETE', true);
+
+/* FILE ATACHMENTS 
 This is an alpha feature with some known bugs (see todo.txt). It could changed in a future release without backward compatibility! */
 define('USER_CONVERSATIONS_ATTACHMENTS', false);
+
+/* end of configration ------------------------------ */
 
 
 // register model-file
 OC::$CLASSPATH['OC_Conversations'] = 'conversations/lib/conversations.php';
+
+// register change user group
+OC_HOOK::connect('OC_User', 'post_addToGroup', 'OC_Conversations', 'changeUserGroup');
+OC_HOOK::connect('OC_User', 'post_removeFromGroup', 'OC_Conversations', 'changeUserGroup');
 
 $icon = 'conversations.png';
 $updates = OC_Conversations::updateCheck();

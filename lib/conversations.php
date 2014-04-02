@@ -24,14 +24,27 @@
 class OC_Conversations
 {
 
-	public static function getConversation($offset=0, $limit=5)	
+	public static function getConversation($offset=0, $limit=5, $from_id=null)	
 	{
 		self::setUserRoomTime();
 		$room = self::getRoom();
 
-		$sql = "SELECT * FROM *PREFIX*conversations
+		/*$sql = "SELECT * FROM *PREFIX*conversations
 				WHERE room = ?
-				ORDER BY id DESC ";                
+				ORDER BY id DESC "; 
+		*/  
+
+		$where = array( "room = ?" );
+		$args = array($room);
+
+		if ( $from_id ) {
+			$where[] = "id = ?";
+			$args[] = $from_id;
+		}
+
+		$sql = 	"SELECT * FROM *PREFIX*conversations " .
+				"WHERE " . implode(" AND ", $where) . 
+				" ORDER BY id DESC";
 
 		$query = OCP\DB::prepare($sql, $limit, $offset);
 		$conversation = $query->execute( array($room) )->fetchAll();
@@ -56,6 +69,23 @@ class OC_Conversations
 							$attachment
 		));		
 		return true;
+	}
+
+	public static function deleteComment( $id ) {
+		if ( ! USER_CONVERSATIONS_CAN_DELETE ) 
+			return false;
+
+		$query = OCP\DB::prepare('SELECT author FROM *PREFIX*conversations WHERE id = ?');
+		$result = $query->execute( array($id) )->fetch();
+
+		$uid = OC_User::getUser();
+		if ( $result['author'] == $uid || OC_User::isAdminUser($uid) ) {
+			$query = OCP\DB::prepare('DELETE FROM *PREFIX*conversations WHERE id = ?');
+			$query->execute( array( $id ));
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	public static function getRooms()
@@ -86,6 +116,8 @@ class OC_Conversations
 		OCP\Config::setAppValue('conversations', self::getRoom(), time());	
 	}
 
+	/*
+	Test for new messages in all user-rooms */
 	public static function updateCheck()
 	{
 		$result = array();
@@ -99,6 +131,8 @@ class OC_Conversations
         return $result;
 	}
 
+	/*
+	Prepare post before printing */
 	public static function preparePost($post) {
 		$date = self::formatDate($post['date']);
 		return array(
@@ -114,6 +148,21 @@ class OC_Conversations
 		);
 	}
 
+	/* 
+	format plaintext of a comment */
+	private static function formatComment($comment) {		
+		$comment = htmlspecialchars($comment);
+		$comment = nl2br($comment);	
+		$comment = preg_replace ( 
+    		"/(?<!a href=\")(?<!src=\")((http|ftp)+(s)?:\/\/[^<>\s]+)/i",
+    		"<a href=\"\\0\" target=\"blank\">\\0</a>",
+    		$comment
+		);	
+		return $comment;
+	}
+
+	/*
+	get attachments for printing posts */
 	private static function getAttachment($attachment) {		
 		$attachment = json_decode($attachment, true);		
 		switch ($attachment['type']) {
@@ -131,6 +180,8 @@ class OC_Conversations
 		}
 	}	
 
+	/*
+	Get internal file attachments for printing posts */
 	private static function getInternalFileAttachment($attachment) {
 		$room = self::getRoom();
 
@@ -151,15 +202,20 @@ class OC_Conversations
 		}
 			
 		$userId = OC_User::getUser();
-		//\OC_Util::setupFS($userId);
-		//\OC\Files\Filesystem::initMountPoints($userId);
 		$view = new \OC\Files\View('/' . $userId . '/files');
 		$fileinfo = $view->getFileInfo($path);
 
 		$download_url = OCP\Util::linkToRoute('download', array('file' => $path));		
+
+		// File not found		
+		if ( \OC\Files\Filesystem::is_file( $path ) == false ) {
+			$fileinfo['name'] = "File not found.";
+			$download_url = "#";
+		}
 		
 		$result = array(
-			"type"		=> $attachment['type'],
+			"type" => $attachment['type'],
+			"mimetype"	=> $fileinfo['mimetype'],
 			"name"		=> $fileinfo['name'],
 			"path"		=> $path,
 			"download_url"	=> $download_url
@@ -167,45 +223,20 @@ class OC_Conversations
 		return $result;
 	}
 
+	/*
+	Share item if not already done */
 	private static function shareAttachment($attachment) {
 		$attachment = json_decode($attachment, true);
 		$room = self::getRoom();
 
 		$item_shared = self::isItemSharedWithGroup( true, 'file', $attachment['owner'], urldecode($attachment['path']) );
-
-		/*
-		$own = ( $attachment['owner'] == OC_User::getUser() ) ? true : false;
-		$item_shared = self::getItemShared('file', $attachment['fileid'], $own);
-
-		if ( ! $item_shared ) {
-			$path = urldecode($attachment['path']);
-			$path = substr($path, strpos($path, "/")+1 );
-			$item_shared = self::getParentsShared($path);
-		}
-		*/
-		/*
-		$item_shared = false;		
-		if ( $attachment['owner'] == OC_User::getUser() ) {
-			//$item_sharings = OCP\Share::getItemShared('file', $attachment['fileid']);		
-		} else {
-			//$item_sharings = OCP\Share::getItemSharedWithBySource('file', $attachment['fileid']);
-		}
-		if ( is_array($item_sharings) ) {
-			foreach ($item_sharings as $item_sharing) {
-				if ( $item_sharing["share_type"] == OCP\Share::SHARE_TYPE_GROUP &&
-					 $item_sharing["share_with"] == $room
-				) {
-					$item_shared = true;
-				}
-			}
-		}
-		*/
-		// item not shared, share it to the current group with read permissions
 		if ( ! $item_shared ) {
 			\OCP\Share::shareItem('file', $attachment['fileid'], OCP\Share::SHARE_TYPE_GROUP, $room, 17);
 		}
 	}
 
+	/*
+	Test if item is shared with a group */
 	private static function isItemSharedWithGroup($recursiv, $type, $owner, $path) {	
 		if ( empty($path) || $path == "files" ) 
 			return false;
@@ -240,6 +271,8 @@ class OC_Conversations
 		return true;
 	}
 
+	/*
+	Get shared path for inherited shared item */
 	private static function getInheritedSharedPath($owner, $path) {
 		$shared_path = substr($path, strrpos($path, "/")+1 ); // filename
 		do {
@@ -249,61 +282,10 @@ class OC_Conversations
 		} while ( ! self::isItemSharedWithGroup(false, 'folder', $owner, $path) );
 
 		return $shared_path;
-	}
+	}	
+
 	/*
-	private static function getItemShared($type, $fileid, $own ) {
-		if ( $own ) {
-			$item_sharings = OCP\Share::getItemShared($type, $fileid);
-		} else {
-			$item_sharings = OCP\Share::getItemSharedWithBySource($type, $fileid);
-		}
-		$item_shared = false;
-
-		if ( is_array($item_sharings) && ! empty($item_sharings) ) {
-			foreach ($item_sharings as $item_sharing) {
-				if ( $item_sharing["share_type"] == OCP\Share::SHARE_TYPE_GROUP &&
-					 $item_sharing["share_with"] == self::getRoom()
-				) {
-					$item_shared = true;
-				}
-			}
-		}
-		// item not shared, share it to the current group with read permissions
-		if ( ! $item_shared ) {
-			return false;
-		} else {
-			return true;
-		}
-	}
-
-	private static function getParentsShared($path) { 				
-		$parent_path = substr($path, 0, strrpos($path, "/") );
-		if ( ! empty($parent_path) ) {
-			$userId = OC_User::getUser();
-			$view = new \OC\Files\View('/' . $userId . '/files');
-			$parent_path_info = $view->getFileInfo($parent_path);
-			if ( $parent_path_info['name'] != "Shared" ) {
-				$owner = OC\Files\Filesystem::getOwner("/". $parent_path);
-				$own = ( $owner == OC_User::getUser() ) ? true : false;
-				$item_shared = self::getItemShared('folder', $parent_path_info['fileid'], $own);
-
-				if ( $item_shared ) {
-					return true;
-				} else {
-					return self::getParentsShared($parent_path);	
-				}
-			} 					
-		}
-		return false;
-	}
-	*/
-
-	private static function formatComment($comment) {		
-		$comment = htmlspecialchars($comment);
-		$comment = nl2br($comment);		
-		return $comment;
-	}
-
+	Get user avatar from OC */
 	private static $avatars = array();
 	private static function getUserAvatar( $user )
 	{
@@ -323,6 +305,8 @@ class OC_Conversations
 		return '';
 	}
 
+	/*
+	Get nice date from timestamp */ 
 	public static function formatDate($date)
 	{
 		$result = array("text" => "", "val" => "");
@@ -356,5 +340,12 @@ class OC_Conversations
 		}
 
 		return $result;
+	}
+
+	/*
+	Hook if a user is added or removed from group to change defualt room */
+	public static function changeUserGroup( $args ) {
+		$query = OCP\DB::prepare('DELETE FROM *PREFIX*preferences WHERE userid = ? AND appid = "conversations" AND configkey = "activeRoom"');
+		$query->execute( array( $args['uid'] ));
 	}
 }

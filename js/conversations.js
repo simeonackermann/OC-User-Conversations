@@ -5,6 +5,8 @@ OC.Conversations = {
 			room : $("#new-comment").attr("data-room"),			
         }, function(jsondata) {
             if(jsondata.status == 'success') {
+            	if ( $("#new-comment-loader").length > 0 )
+            		$("#new-comment-loader").remove();
                 $("#conversation").html(jsondata.data.conversation);
                 //OC.dialogs.alert(jsondata.data.message, jsondata.data.title );
             }
@@ -21,6 +23,18 @@ OC.Conversations = {
             }
         }, 'json');
 	},
+
+	DeleteComment : function(id) {
+		$.post(OC.filePath('conversations', 'ajax', 'deleteComment.php'), {
+            id : id 
+        }, function(jsondata) {
+            if(jsondata.status == 'success') {
+            	$(".comment[data-id='"+id+"']").slideUp();
+            } 
+        }, 'json');
+	},
+
+	
 
 	polling : function() {
 		$.post(OC.filePath('conversations', 'ajax', 'polling.php'), {
@@ -89,26 +103,37 @@ $(document).ready(function(){
 		$("#new-comment").attr("data-room", room);
 
 		OC.Conversations.LoadConversation();		
-	});
+	});	
 
 	// submit new commnt
 	$("#new-comment").submit(function(event) {
 		var comment = $("#new-comment-text").val().trim();
 		var attachment = $("#new-comment-attachment").attr("data-attachment");		
-		
-		OC.Conversations.NewComment(comment, attachment);
-		
-		$("#new-comment-text").val("");
-		$("#new-comment-text").height("55px");
-		OC.Conversations.RemoveAttachmentPreview();
+
+		if ( comment != "" || attachment != "" ) {	
+			$("#new-comment input[type=submit]").after('<img src="'+OC.filePath('core', 'img', 'loading-small.gif')+'" id="new-comment-loader" />');
+
+			OC.Conversations.NewComment(comment, attachment);
+			
+			$("#new-comment-text").val("");
+			$("#new-comment-text").height("55px");
+			OC.Conversations.RemoveAttachmentPreview();
+			
+		}
 		event.preventDefault();
 	});
 
 	// add attachment
 	$('#add-attachment').click(function(){
 		OC.dialogs.filepicker(t('conversations', 'Select file'),OC.Conversations.AddAttachment, false, [], true);
-	});	
-	
+	});
+
+	//delete message 
+	$(document).on('click',".comment-header a.action.delete",function() {
+		var id = $(this).parent().parent().parent(".comment").attr("data-id");
+		OC.Conversations.DeleteComment(id);
+		return false;
+	});
 
 	// infinite scrolling
 	var $container = $('#conversation');
@@ -137,5 +162,4 @@ $(document).ready(function(){
 
 	// polling interval
 	setInterval( function(){ OC.Conversations.polling(); }, 5000);
-
 });

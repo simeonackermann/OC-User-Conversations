@@ -37,7 +37,7 @@
 	border:1px solid #ccc;
 	margin: 7px 0 10px 0;
 }
-@media all and (max-width: 620px) {
+@media all and (max-width: 480px) {
 	#new-comment {
 		width: 100%;
 	}
@@ -67,6 +67,10 @@
 #new-comment input[type=submit] {
 	float: right;
 }
+#new-comment-loader { 
+	float:right;
+	margin: 10px 5px 0px 5px;
+}
 #add-attachment {
 	margin: 10px 0 0 0;
 	opacity: 0.5;
@@ -91,8 +95,13 @@
 	color: #ccc;
 	margin: 10px 5px;
 }
+#new-comment-attachment .oc-dialog-close {
+	float: right;
+}
+
 .comment {
 	margin-bottom: 15px;
+	color: #555;
 }
 
 .comment-header {
@@ -118,9 +127,30 @@
 	padding: 5px 0 0 5px;
 }
 
+.comment-header .delete {
+	float: right;
+	/* position: absolute;
+	right: 14px;
+	margin-top: -9px; */
+}
+
+.comment-header a.action.delete {
+	opacity: 0;	
+	padding: 9px 14px 19px !important;
+}
+.comment-header:hover a.action.delete {
+	opacity: 0.5;
+}
+.comment-header a.action.delete:hover {
+	opacity: 1;
+}
+
 .comment-text {
 	clear: both;
 	padding: 10px;
+}
+.comment-text a {
+	color: #000;
 }
 .comment-attachment {
 	clear: both;
@@ -128,10 +158,6 @@
 }
 .comment-attachment img {
 	margin: 0 5px -14px 0px;
-}
-
-#new-comment-attachment .oc-dialog-close {
-	float: right;
 }
 
 #infscr-loading { 

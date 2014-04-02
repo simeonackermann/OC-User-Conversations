@@ -29,7 +29,7 @@ if ( isset($_POST['room']) ) {
 	$room = $_POST['room'];
 
 	// store room as user default
-	OCP\Config::setUserValue(OC_User::getUser(), 'conversations', 'activeRoom', $room);	
+	OCP\Config::setUserValue(OC_User::getUser(), 'conversations', 'activeRoom', $room);
 
 	// load room
     $tmpl = new OCP\Template( 'conversations' , 'part.conversation' );

@@ -45,13 +45,23 @@ if ( $path ) {
 	}
 
 	$download_url = OCP\Util::linkToRoute('download', array('file' => $path));
+
+	// File not found
+	if ( \OC\Files\Filesystem::is_file( $path ) == false ) {
+		$fileinfo['name'] = "File not found.";
+		$download_url = "#";
+	}
+
+	// array for attachment template
 	$tmpl_arr = array(
 		"type"	=> $type,
+		"mimetype"	=> $fileinfo['mimetype'],
 		"path"	=> $path,
 		"name"	=> $fileinfo['name'],
 		"download_url" => $download_url,
 	);
 
+	// result array for new comment attachment data
 	$data = array(
 		"type"		=> $type,
 		"fileid"	=> $fileinfo['fileid'],
@@ -60,12 +70,13 @@ if ( $path ) {
 	);
 
 	$l=OC_L10N::get('conversations');	
+	// store attachment template into variable
 	$tmpl = new OCP\Template( 'conversations' , 'part.attachment' );
     $tmpl->assign( 'attachment' , $tmpl_arr );
     ob_start();
-    $tmpl->printPage();
-    echo '<p>' . ($l->t("The file will be shared with the %s group.", $room)) . '</p>';
-	$html = ob_get_contents();
+    	$tmpl->printPage();
+    	echo '<p>' . ($l->t("The file will be shared with the %s group.", $room)) . '</p>';
+		$html = ob_get_contents();
 	ob_end_clean();
 
     OCP\JSON::success(array('data' => array( 'preview' => $html, 'data' => json_encode($data) )));

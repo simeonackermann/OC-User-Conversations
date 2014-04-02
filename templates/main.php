@@ -15,22 +15,17 @@
 			<?php if ( USER_CONVERSATIONS_ATTACHMENTS && OCP\Share::isEnabled() ) { ?>
 				<div id="new-comment-attachment" data-attachment="" style="display:none"></div>
 				<a href="#" title="<?php p($l->t("Add file")); ?>" id="add-attachment"><img class="svg" alt="" src="<?php p(OC::$WEBROOT . '/core/img/places/folder.svg'); ?>" /></a>
-			<?php } ?>
+			<?php } ?>			
 			<input type="submit" class="button" value="<?php p($l->t("Submit")); ?>..." disabled="disabled" />
 			<br clear="both" />
 		</div>
 	</form>
 
 	<div id="conversation">
-		<?php
-			
-
-			echo $this->inc('part.conversation');
-	    ?>
-
+		<?php echo $this->inc('part.conversation'); ?>
 	</div>
 
-		<?php
+	<?php
 	// Dummy navigation. Needed for endless scrolling
 	if (isset($_['nextpage'])) : ?>
 		<nav id="page-nav">

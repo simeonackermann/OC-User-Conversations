@@ -4,7 +4,9 @@ extract($attachment);
 
 switch ( $type ) {
 	case 'internal_file':
-		$icon_url = OC::$WEBROOT . "/index.php/core/preview.png?x=36&y=36&file=" . urlencode($path);
+		//use: OC_Helper::previewIcon( $path ); OC_Helper::mimetypeIcon( $mimetype );
+		$icon_url = OC_Helper::mimetypeIcon( $mimetype );
+		//$icon_url = OC::$WEBROOT . "/index.php/core/preview.png?x=36&y=36&file=" . urlencode($path);
 		echo '<a href="'.$download_url.'"><img src="'.$icon_url.'" />'.$name.'</a>';
 		break;
 	

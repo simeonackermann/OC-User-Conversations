@@ -24,22 +24,32 @@ Attention: this is beta software.
 
 ## TODO 
 
-* BUG: when changing/adding user to group the "activeRoom" user value evoid the change -> need a hook for this case, deleting the user value
+* on new messages or polling -> append on top to current conversation, dont load the complete stream!
+	.simple solution 1: get every message with higher IDs the current max id...
 * integrate UserTimezone
 * language sensitive date (after x days) if no userValue setted
 * add attachments (file sharings):
-	* Error test: isFile, on print yet shared?
-	* real internal_image (not y square)
-	* use: OC_Helper::previewIcon( $path ); OC_Helper::mimetypeIcon( $mimetype );
-	* Share-Bug: wrong download-link for items in a shared subfolder (e.g. /Music/SharedMusic/File.mp3)
-* user/admin can delete messages
-* highlight new messages
+	* real internal_image (not y square) -> OC_Image
+* remove red new message app-icon in app-menu when conversations app clicked
+* highlight new messages -> http://jqueryui.com/effect/
 * Link/URL triggering
 	url detection:http://www.9lessons.info/2010/06/facebook-like-extracting-url-data-with.html
     Facebook url detection: http://www.youtube.com/watch?v=twqWe327yyE
 * wysiwyg (fett,italic,...)
+* emoticons
+* option: message to single user
+* config menu in control header bar for special features
+* config-option: dont split into rooms/groups
+* code documentation
 
 ## Changelog:
+
+Version 0.1.6 / 2014/04/03
+* user can delete own posts, admin all
+* test if attached internal file exists
+* making hyperlinks clickable
+* loader icon on new post submit
+* some bug fixes and codechanges
 
 Version 0.1.5 / 2014/03/15
  * autosize textarea
