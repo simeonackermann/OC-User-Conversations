@@ -22,26 +22,6 @@ Alpha-feature: file attachments (yet deactivated by default). Can activated in a
 Attention: this is beta software.
 
 
-## TODO 
-
-* on new messages or polling -> append on top to current conversation, dont load the complete stream!
-	.simple solution 1: get every message with higher IDs the current max id...
-* integrate UserTimezone
-* language sensitive date (after x days) if no userValue setted
-* add attachments (file sharings):
-	* real internal_image (not y square) -> OC_Image
-* remove red new message app-icon in app-menu when conversations app clicked
-* highlight new messages -> http://jqueryui.com/effect/
-* Link/URL triggering
-	url detection:http://www.9lessons.info/2010/06/facebook-like-extracting-url-data-with.html
-    Facebook url detection: http://www.youtube.com/watch?v=twqWe327yyE
-* wysiwyg (fett,italic,...)
-* emoticons
-* option: message to single user
-* config menu in control header bar for special features
-* config-option: dont split into rooms/groups
-* code documentation
-
 ## Changelog:
 
 Version 0.1.6 / 2014/04/03
