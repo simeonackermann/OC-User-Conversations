@@ -25,37 +25,30 @@ OCP\JSON::checkAppEnabled('conversations');
 OCP\JSON::checkLoggedIn();
 OCP\JSON::callCheck();
 
-if ( isset($_POST['room']) ) {
-	$room = $_POST['room'];
+$room = isset( $_REQUEST['room'] ) ? $_REQUEST['room'] : false;
+
+if ( $room ) {
 
 	// store room as user default
 	OCP\Config::setUserValue(OC_User::getUser(), 'conversations', 'activeRoom', $room);
 
-	// load room
-    $tmpl = new OCP\Template( 'conversations' , 'part.conversation' );
-    $tmpl->assign( 'conversation' , OC_Conversations::getConversation() );
-    $conversation = $tmpl->fetchPage();
-
-    OCP\JSON::success(array('data' => array( 'conversation' => $conversation  )));
-}
-
-if ( isset($_GET['room'])) {
-	$room = $_GET['room'];
-
 	// read the next 30 items for the endless scrolling
 	// get the page that is requested. Needed for endless scrolling
 	$count = 5;
-	if (isset($_GET['page'])) {
-		$page = intval($_GET['page']) - 1;
-	} else {
-		$page = 0;
-	}
+	$page = isset($_REQUEST['page']) ? intval($_REQUEST['page']) : 0;
 
-	// store room as user default
-	OCP\Config::setUserValue(OC_User::getUser(), 'conversations', 'activeRoom', $room);	
+	$from_id = isset($_REQUEST['from_id']) ? intval($_REQUEST['from_id']) : null;
 
 	// load room
     $tmpl = new OCP\Template( 'conversations' , 'part.conversation' );
-    $tmpl->assign( 'conversation' , OC_Conversations::getConversation($page * $count, $count) );
-    $tmpl->printPage();
+    $tmpl->assign( 'conversation' , OC_Conversations::getConversation($page * $count, $count, $from_id) );
+
+    if ( isset($_REQUEST['print_tmpl']) ) {
+    	// print for infinite scroll
+    	$tmpl->printPage();
+    } else {
+    	// return json for submit or polling
+    	$conversation = $tmpl->fetchPage();
+	    OCP\JSON::success(array('data' => array( 'conversation' => $conversation  )));
+	}
 }

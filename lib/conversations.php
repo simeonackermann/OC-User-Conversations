@@ -38,7 +38,7 @@ class OC_Conversations
 		$args = array($room);
 
 		if ( $from_id ) {
-			$where[] = "id = ?";
+			$where[] = "id > ?";
 			$args[] = $from_id;
 		}
 
@@ -47,7 +47,7 @@ class OC_Conversations
 				" ORDER BY id DESC";
 
 		$query = OCP\DB::prepare($sql, $limit, $offset);
-		$conversation = $query->execute( array($room) )->fetchAll();
+		$conversation = $query->execute( $args )->fetchAll();
 		return $conversation;
 	}
 

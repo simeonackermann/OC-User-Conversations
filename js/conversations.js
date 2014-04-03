@@ -1,14 +1,24 @@
 OC.Conversations = {
 
-	LoadConversation : function() {		
+	LoadConversation : function(from_id, highlight) {		
+		if( typeof(from_id) === 'undefined' ) var from_id = null;
+		if( typeof(highlight) === 'undefined' ) var highlight = false;
 		$.post(OC.filePath('conversations', 'ajax', 'fetchConversation.php'), {
-			room : $("#new-comment").attr("data-room"),			
+			room : $("#new-comment").attr("data-room"),
+			from_id : from_id,
         }, function(jsondata) {
             if(jsondata.status == 'success') {
-            	if ( $("#new-comment-loader").length > 0 )
-            		$("#new-comment-loader").remove();
-                $("#conversation").html(jsondata.data.conversation);
-                //OC.dialogs.alert(jsondata.data.message, jsondata.data.title );
+                if ( from_id != null ) {
+                	// submit or polling request -> prepend new msgs
+            		$("#conversation").prepend(jsondata.data.conversation);
+            	} else {
+            		// load complete room
+                	$("#conversation").html(jsondata.data.conversation);
+                } 
+				if ( $("#new-comment-loader").length > 0 ) 
+					$("#new-comment-loader").remove(); 
+				if ( highlight ) 
+					$(".comment:first-child").effect("bounce", {}, 400);
             }
         }, 'json');
 	},
@@ -19,7 +29,8 @@ OC.Conversations = {
             attachment : attachment
         }, function(jsondata) {
             if(jsondata.status == 'success') {
-                OC.Conversations.LoadConversation();
+                var last_id = $(".comment:first-child").attr("data-id");
+                OC.Conversations.LoadConversation( last_id );
             }
         }, 'json');
 	},
@@ -33,7 +44,6 @@ OC.Conversations = {
             } 
         }, 'json');
 	},
-
 	
 
 	polling : function() {
@@ -43,7 +53,8 @@ OC.Conversations = {
             	for ( var room in jsondata.data.update) {
             		if ( room ==  $("#new-comment").attr("data-room") ) {
             			// new msgs in room
-            			OC.Conversations.LoadConversation();
+            			var last_id = $(".comment:first-child").attr("data-id");
+            			OC.Conversations.LoadConversation( last_id, true );
             		} else {
             			// new msgs in other room
             			$("#rooms-list input[value=" + room + "]").addClass('new-msg');
@@ -147,7 +158,7 @@ $(document).ready(function(){
 		prefill: true,
 		path : function(page){
 			var room = $("#new-comment").attr("data-room");
-			return OC.filePath('conversations', 'ajax', 'fetchConversation.php') + '?page=' + page + '&room=' + room;
+			return OC.filePath('conversations', 'ajax', 'fetchConversation.php') + '?print_tmpl=true&page=' + page + '&room=' + room;
 		},
 		loading: {
 			finishedMsg: t('conversations', 'No more comments to load'),
