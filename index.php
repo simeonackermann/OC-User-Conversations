@@ -46,9 +46,11 @@ if (isset($_GET['page'])) {
 $nextpage = \OCP\Util::linkToAbsolute('conversations', 'index.php', array('page' => $page + 2));
 
 $tmpl = new OCP\Template( 'conversations', 'main', 'user' );
-if ( count($rooms) > 1 ) $tmpl->assign( 'rooms' , $rooms );
-if ($page == 0) $tmpl->assign('nextpage', $nextpage);
+if ( count($rooms) > 1 )
+	$tmpl->assign( 'rooms' , $rooms );
+if ($page == 0)
+	$tmpl->assign('nextpage', $nextpage);
 $tmpl->assign( 'active_room' , OC_Conversations::getRoom() );
-$tmpl->assign( 'conversation' , OC_Conversations::getConversation($page * $count, $count) );
+$tmpl->assign( 'conversation' , OC_Conversations::getConversation($active_room, $page * $count, $count) );
 
 $tmpl->printPage();

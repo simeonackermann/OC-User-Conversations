@@ -2,7 +2,7 @@
 
 This app provides a simple and clean possibility to have conversations/discussions between users.
 
-AThe conversations are divided into the groups of the users if any available.
+The conversations are divided into the groups of the users if any available.
 
 ## Features: 
 
@@ -15,10 +15,11 @@ AThe conversations are divided into the groups of the users if any available.
  * highlighting new msgs
  * Alpha-feature: file attachments (yet deactivated by default). Can activated in appinfo/app.php. Use it with care.
 
+ ## Install:
 
-## Install:
+ * download and unzip to **/owncloud/apps/conversations**
+ * activate it in OC backend
 
- * download and unzip to apps/conversations folder
- * activate it in oc backend
+Release information on [GitHub](https://github.com/simeonackermann/OC-User-Conversations/releases)
 
-Attention: this is beta software
+_Attention: this is beta software_

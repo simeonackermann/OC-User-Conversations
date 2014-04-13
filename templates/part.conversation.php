@@ -1,8 +1,10 @@
+<?php if ( empty($_['conversation'])) 
+	//echo "<i>No comments to load.</i>";
+?>
 <?php foreach ($_['conversation'] as $post) : 
 	$post = OC_Conversations::preparePost($post);
-	extract($post);
-	?>
-	<div class="comment" data-id="<?php p($post['id']); ?>">
+	extract($post); ?>
+	<div class="comment" data-id="<?php p($id); ?>">
 		<div class="comment-header">
 			<?php if ( ! empty($avatar) ) { ?>
 				<div class="avatar">
@@ -11,7 +13,7 @@
 			<?php } ?>
 			<div class="author">
 				<?php p( $author ); ?>
-			</div>
+			</div>			
 			<?php 
 			$uid = OC_User::getUser();
 			if( USER_CONVERSATIONS_CAN_DELETE && ( OC_User::isAdminUser($uid) || $author == $uid ) ): ?>

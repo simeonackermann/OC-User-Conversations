@@ -29,4 +29,4 @@ $update = OC_Conversations::updateCheck();
 
 OC_Conversations::setUserRoomTime();
 
-OCP\JSON::success(array('data' => array( 'update' => $update )));
+OCP\JSON::success(array('data' => $update ));

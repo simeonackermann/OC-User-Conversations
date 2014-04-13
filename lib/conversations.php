@@ -24,26 +24,45 @@
 class OC_Conversations
 {
 
-	public static function getConversation($offset=0, $limit=5, $from_id=null)	
-	{
-		self::setUserRoomTime();
-		$room = self::getRoom();
+	public static function getConversation($room=false, $offset=0, $limit=5, $from_id=null, $from_date=null)
+	{	
+		$userId = OC_User::getUser();	
+		$room = ( $room ) ? $room : self::getRoom();
+		$rtype = explode(":", $room);
+		// last id :http://www.php.net/manual/en/pdo.lastinsertid.php
+		self::setUserRoomTime();		
 
-		/*$sql = "SELECT * FROM *PREFIX*conversations
-				WHERE room = ?
-				ORDER BY id DESC "; 
-		*/  
+		if ( $rtype[0] == "group" ) {			
+			// for compatibility with UC <= 0.1.6: get room-msgs without "group:" prefix
+			$and = array( "( room = ? OR room = ? )" );
+			$args = array($room, $rtype[1]); // rtype[1] for compatibilty
+		} else {
+			// get user rooms: msgs to user X from me OR to me from user X
+			$and = array( "( ( room = ? AND author = ? ) OR ( room = ? AND author = ? ) )" );
+			$args = array($room, $userId, 'user:' . $userId, $rtype[1]);
+		}
 
-		$where = array( "room = ?" );
-		$args = array($room);
+		// if single msgs feature enabled
+		/*
+		if ( USER_CONVERSATIONS_PRIVATE_MSGS ) {
+			// get any room-msgs and exclusive msgs to me and from me
+			$and = array( "( room = ? OR room LIKE CONCAT(?, '|".$userId."') OR ( room LIKE CONCAT(?, '|%') AND author = ? ) )" );
+			array_push($args, $room, $room, $userId);
+		}
+		*/
 
-		if ( $from_id ) {
-			$where[] = "id > ?";
+		if ( $from_id ) { // used in submit new comment, to get only the new comment; TODO: could be done with with $limit
+			$and[] = "id > ?";
 			$args[] = $from_id;
 		}
 
+		if ( $from_date ) { // used in polling, to get only newer posts than a date
+			$and[] = "date > ?";
+			$args[] = $from_date;
+		}
+
 		$sql = 	"SELECT * FROM *PREFIX*conversations " .
-				"WHERE " . implode(" AND ", $where) . 
+				"WHERE " . implode(" AND ", $and) . 
 				" ORDER BY id DESC";
 
 		$query = OCP\DB::prepare($sql, $limit, $offset);
@@ -51,10 +70,10 @@ class OC_Conversations
 		return $conversation;
 	}
 
-	public static function newComment( $comment, $attachment )
-	{
-		self::setRoomTime();
+	public static function newComment( $comment, $attachment ) // TODO optional $room parameter
+	{		
 		$room = self::getRoom();
+		$userId = OC_User::getUser();
 
 		if ( USER_CONVERSATIONS_ATTACHMENTS &&  OCP\Share::isEnabled() && ! empty($attachment) ) {
 			self::shareAttachment($attachment);
@@ -63,11 +82,12 @@ class OC_Conversations
 		$query = OCP\DB::prepare('INSERT INTO *PREFIX*conversations (room,author,date,text,attachment) VALUES (?,?,?,?,?)');
 		$query->execute( array(
 							$room,
-							OC_User::getUser(),
+							$userId,
 							date( 'Y-m-d H:i:s'),
 							trim($comment),
 							$attachment
-		));		
+		));	
+		self::setRoomTime();	
 		return true;
 	}
 
@@ -88,6 +108,69 @@ class OC_Conversations
 		}
 	}
 
+	public static function getRooms() {
+		$grooms = array();
+		$urooms = array();
+		$userId = OC_User::getUser();
+		$ordering = array();
+		// add groups the user contains if more than the user himself is in the room
+		foreach (OC_Group::getUserGroups($userId) as $group) {
+			if ( count(OC_Group::usersInGroup($group)) > 1 ) {
+				$grooms["group:".$group] = array( "type" => "group", "name" => $group );
+				//$ordering[] = 0 . 
+				if ( UC_ROOM_ONLY_MSGS ) {
+					// ##########
+					// TODO: maybe private msgs only to users in same rooms
+					// ##########
+				}
+			}
+		}
+		// if no group exist create default 
+		if ( empty($grooms) )
+			$grooms["group:default"] = array( "type" => "group", "name" => "default" );
+
+		// add all other users
+		if ( UC_ROOM_ONLY_MSGS == false ) {
+			foreach (OC_User::getUsers() as $user) {
+				if ( $userId != $user ) {
+					$urooms["user:".$user] = array( "type" => "user", "name" => $user );
+				}
+			}
+		}
+		$rooms = $grooms + $urooms; 
+		/*
+			if ( $room['type'] == "group" ) {
+				$rtime = $conf['rooms'][$rkey]['wtime'];
+				//$lastmsg = $conf['rooms'][$rkey]['lastmsg'];
+			} else {
+				$u2conf = OCP\Config::getUserValue( $room['name'], 'conversations', 'conf', false );
+				$u2conf = ( ! $u2conf ) ? array() : unserialize( $u2conf );
+				$rtime = $u2conf['rooms']['user:'.$userId]['wtime'];
+				//$lastmsg = $u2conf['rooms']['user:'.$userId]['lastmsg'];
+			}
+			$urtime = $uconf['rooms'][$rkey]['rtime'];
+			//$ulastmsg = $uconf['rooms'][$rkey]['lastmsg'];
+			if ( $rtime > $urtime ) {
+				// get newer comments than last user room read time
+				$new_comments = self::getConversation( $rkey, null, null, null, date( 'Y-m-d H:i:s', $urtime) );
+				$result[$rkey] = array( 'newmsgs' => count($new_comments) );
+			}
+		*/
+		return $rooms;
+	}	
+
+	// return active room from user value. If not exists return first room from rooms-list
+	public static function getRoom()
+	{		
+		$room = OCP\Config::getUserValue(OC_User::getUser(), 'conversations', 'activeRoom', false);
+		if ( $room == false ) {
+			foreach (self::getRooms() as $key => $value) break; // get the first key of rooms
+			$room = $key;
+		}
+		// TODO: return type and title array
+		return $room;
+	}
+	/*
 	public static function getRooms()
 	{	
 		$rooms = array();
@@ -100,34 +183,127 @@ class OC_Conversations
 		return $rooms;
 	}
 
+	// return active room from user value. If not exists return first room from rooms-list
 	public static function getRoom()
-	{
-		$rooms = self::getRooms();
-		return OCP\Config::getUserValue(OC_User::getUser(), 'conversations', 'activeRoom', $rooms[0]);
+	{		
+		$room = OCP\Config::getUserValue(OC_User::getUser(), 'conversations', 'activeRoom', false);
+		if ( $room == false ) {
+			$rooms = self::getRooms();
+			$room = $rooms[0];
+		}
+		return $room;
+	}
+	*/
+
+	// write current time to user conf on reading a conversation
+	public static function setUserRoomTime( $room=false ) {		
+		$userId = OC_User::getUser();
+		$room = ( $room ) ? $room : self::getRoom();
+
+		$conf = OCP\Config::getUserValue( $userId, 'conversations', 'conf', false );
+		$conf = ( ! $conf ) ? array() : unserialize( $conf );
+		$conf['rooms'][$room]['rtime'] = time();
+
+		OCP\Config::setUserValue( $userId, 'conversations', 'conf', serialize($conf));				
 	}
 
+	
+	// write time and new message id on submit new comment 
+	public static function setRoomTime( $room=false, $lastmsg=false ) {		
+		$userId = OC_User::getUser();
+		$room = ( $room ) ? $room : self::getRoom();
+		$time = time();
+
+		$rtype = explode(":", $room);
+		$rtype = $rtype[0];		
+
+		/*
+		if ( ! $lastmsg ) {
+			$query = OCP\DB::prepare("SELECT id FROM *PREFIX*conversations WHERE room = ? ORDER BY id DESC", 1, 0);
+			$lastmsg = $query->execute( array($room) )->fetch();
+			$lastmsg = ( !$lastmsg ) ? 0 : $lastmsg['id'];
+		}		
+		*/
+
+		$conf = OCP\Config::getUserValue( $userId, 'conversations', 'conf', false );
+		$conf = ( ! $conf ) ? array() : unserialize( $conf );
+		//$conf['rooms'][$room]['lastmsg'] = $lastmsg;
+		$conf['rooms'][$room]['wtime'] = $time;
+
+		OCP\Config::setUserValue( $userId, 'conversations', 'conf', serialize($conf));	
+
+		if ( $rtype == "group" ) {
+			$gconf = OCP\Config::getAppValue( 'conversations', 'conf', false );
+			$gconf = ( ! $gconf ) ? array() : unserialize( $gconf );
+			//$gconf['rooms'][$room]['lastmsg'] = $lastmsg;
+			$gconf['rooms'][$room]['wtime'] = $time;
+			OCP\Config::setAppValue( 'conversations', 'conf', serialize($gconf));
+		}			
+	}
+
+	// obsolet
+	/*
 	public static function setUserRoomTime()
 	{
-		OCP\Config::setUserValue(OC_User::getUser(), 'conversations', 'roomTime-' . self::getRoom(), time());
+		//OCP\Config::setUserValue(OC_User::getUser(), 'conversations', 'roomTime-' . self::getRoom(), time());
+		//self::setUserConfLastMsg();
 	}
+	*/
 
+	// obsolet
+	/*
 	public static function setRoomTime()
 	{
-		OCP\Config::setAppValue('conversations', self::getRoom(), time());	
+		//OCP\Config::setAppValue('conversations', self::getRoom(), time());	
+		self::setConfLastMsg();
 	}
+	*/
 
 	/*
-	Test for new messages in all user-rooms */
+	Test for new messages in all rooms */
 	public static function updateCheck()
-	{
+	{		
+		$userId = OC_User::getUser();
 		$result = array();
+
+		$conf = OCP\Config::getAppValue( 'conversations', 'conf', false );
+		$conf = ( ! $conf ) ? array() : unserialize( $conf );
+
+		$uconf = OCP\Config::getUserValue( $userId, 'conversations', 'conf', false );
+		$uconf = ( ! $uconf ) ? array() : unserialize( $uconf );
+
+
+		foreach (self::getRooms() as $rkey => $room) {
+			//$rtype = explode(":", $room);
+			if ( $room['type'] == "group" ) {
+				$rtime = $conf['rooms'][$rkey]['wtime'];
+				//$lastmsg = $conf['rooms'][$rkey]['lastmsg'];
+			} else {
+				$u2conf = OCP\Config::getUserValue( $room['name'], 'conversations', 'conf', false );
+				$u2conf = ( ! $u2conf ) ? array() : unserialize( $u2conf );
+				$rtime = $u2conf['rooms']['user:'.$userId]['wtime'];
+				//$lastmsg = $u2conf['rooms']['user:'.$userId]['lastmsg'];
+			}
+			$urtime = $uconf['rooms'][$rkey]['rtime'];
+			//$ulastmsg = $uconf['rooms'][$rkey]['lastmsg'];
+			if ( $rtime > $urtime ) {
+				// get newer comments than last user room read time
+				$new_comments = self::getConversation( $rkey, null, null, null, date( 'Y-m-d H:i:s', $urtime) );
+				$result[$rkey] = array( 'newmsgs' => count($new_comments) );
+			}
+		}
+
+		/*
 		foreach (self::getRooms() as $room) {
+			
+			/*
 			$room_time = OCP\Config::getAppValue('conversations', $room, 0);
 			$user_room_time = OCP\Config::getUserValue(OC_User::getUser(), 'conversations', 'roomTime-' . $room, 0);
 			if ( $room_time > $user_room_time ) {
 				$result[$room] = true;
 			}
 		}
+		*/
         return $result;
 	}
 
@@ -138,13 +314,14 @@ class OC_Conversations
 		return array(
 			"id"		=> $post['id'],
 			"avatar"	=> self::getUserAvatar($post['author']),
-			"author"	=> OC_User::getDisplayName($post['author']),
+			"author"	=> self::getDisplayName($post['author'], $post['room']),
 			"date"		=> array(
 				"text"	=> $date['text'],
 				"val"	=> $date['val'],
 			),
 			"text"		=> (empty($post['text'])) ? "" : self::formatComment($post['text']),
 			"attachment"=> (empty($post['attachment'])) ? "" : self::getAttachment($post['attachment']),
+			"room"		=> $post['room'],
 		);
 	}
 
@@ -282,12 +459,26 @@ class OC_Conversations
 		} while ( ! self::isItemSharedWithGroup(false, 'folder', $owner, $path) );
 
 		return $shared_path;
-	}	
+	}
+
+	private static function getDisplayName( $author, $room ) {
+		$name = OC_User::getDisplayName($author);
+		// if private msgs add receiver
+		if ( USER_CONVERSATIONS_PRIVATE_MSGS ) {
+			$rr = explode("|", $room);
+			$rrc = count($rr);
+			if ( $rrc > 1 ) {
+				$receiver = $rr[$rrc-1];
+				$name .= " > ". $receiver;
+			}			
+		}
+		return $name;
+	}
 
 	/*
 	Get user avatar from OC */
-	private static $avatars = array();
-	private static function getUserAvatar( $user )
+	public static $avatars = array();
+	public static function getUserAvatar( $user )
 	{
 		if ( ! array_key_exists($user, self::$avatars) ) {
 			$avatar = New OC_Avatar($user);

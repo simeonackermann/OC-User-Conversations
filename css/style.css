@@ -1,11 +1,24 @@
+#content {
+	color: #555;
+}
+#app-navigation {
+	width: 150px;	
+	position: fixed;
+}
+
 #app-content {	
 	position: relative;	
 	width: 80%;
 	height: auto;
+	y-overflow: auto;
 	max-width: 800px;
-	margin: 0px 0px 0px 40px;
 	padding: 0px 40px 0px 40px;		
 }
+#page-nav {
+	margin: 0 0 40px 0;
+	height: 10px;
+}
+/*
 #rooms-list {
 	padding: 0px 15px 0px 20px;
 }
@@ -30,6 +43,29 @@
 }
 #rooms-list .new-msg {
 	background-image: url('%appswebroot%/conversations/img/blink.gif');
+}
+*/
+/*#rooms .group + .user {*/
+#rooms .user-label {
+	border-top: 1px dashed #ccc;
+}
+#rooms .active {
+	font-weight: bold;
+	color: #555;
+}
+#rooms img {
+	margin: 5px 3px 0 0;
+	float: left;
+}
+#rooms .new-msg {
+	//background-image: url('%appswebroot%/conversations/img/blink.gif');
+	text-shadow: 0px 0px 0px #555;
+}
+#rooms label {
+	padding: 6px 6px;
+	font-weight: bold;
+	font-style: italic;
+	display: block;
 }
 
 #new-comment {	
@@ -101,7 +137,6 @@
 
 .comment {
 	margin-bottom: 15px;
-	color: #555;
 }
 
 .comment-header {

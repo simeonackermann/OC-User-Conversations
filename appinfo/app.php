@@ -27,9 +27,13 @@
 /* User can delete own posts, admin can delete all */
 define('USER_CONVERSATIONS_CAN_DELETE', true);
 
+
+define('UC_ROOM_ONLY_MSGS', false);
+
+
 /* FILE ATACHMENTS 
 This is an alpha feature with some known bugs (see todo.txt). It could changed in a future release without backward compatibility! */
-define('USER_CONVERSATIONS_ATTACHMENTS', false);
+define('USER_CONVERSATIONS_ATTACHMENTS', true);
 
 /* end of configration ------------------------------ */
 
