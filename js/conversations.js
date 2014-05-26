@@ -1,12 +1,10 @@
 OC.Conversations = {
 
-	// TODO: activeRoom : "",
-
 	LoadConversation : function(from_id, highlight) {		
 		if( typeof(from_id) === 'undefined' ) var from_id = null;
 		if( typeof(highlight) === 'undefined' ) var highlight = false;
 		$.post(OC.filePath('conversations', 'ajax', 'fetchConversation.php'), {
-			room : $("#new-comment").attr("data-room"),
+			room : $("#new-comment").attr("data-room"), // TODO: remove room argument!
 			from_id : from_id,
         }, function(jsondata) {
             if(jsondata.status == 'success') {
@@ -52,24 +50,17 @@ OC.Conversations = {
 		$.post(OC.filePath('conversations', 'ajax', 'polling.php'), {
         }, function(jsondata) {
             if(jsondata.status == 'success') {
-            	//console.log( jsondata.data );	
             	for ( var rkey in jsondata.data) {            		
             		if ( rkey ==  $("#new-comment").attr("data-room") ) {
-            			// new msgs in room
+            			// new msgs in current room
             			var last_id = $(".comment:first-child").attr("data-id");
             			OC.Conversations.LoadConversation( last_id, true );
             		} else {            			
             			// new msgs in other room
             			var newmsgs = jsondata.data[rkey].newmsgs;
             			var rkeyclass = rkey.replace(/:/g, "-");
-            			//$("#rooms-list input[value=" + room + "]").addClass('new-msg');            			
-            			$("li[data-room='" + rkey + "']").addClass('new-msg');
-            			if ( $("#"+rkeyclass+"-new-msgs").length > 0 ) {
-            				$("#"+rkeyclass+"-new-msgs").text("("+newmsgs+")");
-            			} else {
-            				$("li[data-room='" + rkey + "'] a").append(' <span id="'+rkeyclass+'-new-msgs" class="new-msgs-counter">('+newmsgs+')</span>');
-            			}
-            			
+            			$("li[data-room='" + rkey + "']").addClass('new-msg');            			
+            			$("li[data-room='" + rkey + "'] span").text( "(" + newmsgs + ")");
             		}
             		
             	}
@@ -97,71 +88,17 @@ OC.Conversations = {
 		$("#new-comment-attachment").attr("data-attachment", "");
 		$("#add-attachment").show();
 	},
-
-
-	/*
-	mesgto : [],
-	
-	initDropDown : function() {
-
-		// TODO: nicht an Gruppen senden -> alle Gruppen in OC.Conversations.mesgto[OC.Share.SHARE_TYPE_GROUP]
-
-        OC.Conversations.mesgto[OC.Share.SHARE_TYPE_USER] = [];
-        OC.Conversations.mesgto[OC.Share.SHARE_TYPE_GROUP] = [];
-
-        $('#msg-receiver').autocomplete({
-            minLength : 2,
-            source : function(search, response) {
-                $.get(OC.filePath('core', 'ajax', 'share.php'), {
-                    fetch : 'getShareWith',
-                    search : search.term,
-                    itemShares : [OC.Conversations.mesgto[OC.Share.SHARE_TYPE_USER], OC.Conversations.mesgto[OC.Share.SHARE_TYPE_GROUP]]
-                }, function(result) {
-                    if(result.status == 'success' && result.data.length > 0) {
-                        response(result.data);
-                    }
-                });
-            },
-            focus : function(event, focused) {
-                event.preventDefault();
-            },
-            select : function(event, selected) {
-                var msgType = selected.item.value.shareType;
-                var msgTo = selected.item.value.shareWith;
-                var newitem = '<li ' + 'data-message-to="' + msgTo 
-                            + '" ' + 'data-message-type="' + msgType + '">' + msgTo 
-                            + ' (' + (msgType == OC.Share.SHARE_TYPE_USER ? t('core', 'user') : t('core', 'group')) + ')' 
-                            +'<span class="msgactions">'+ '<img class="svg action delete" title="' + t('internal_messages', 'Quit') + '" src="' 
-                            + OC.imagePath('core', 'actions/delete.svg') + '"></span></li>';
-                //$('.sendto.msglist').append(newitem);
-                alert(newitem);
-                //$('#sharewith').val('');
-                OC.Conversations.mesgto[msgType].push(msgTo);
-                return false;
-            },
-        });
-    }
-    */
 }
 
 $(document).ready(function(){
 
-	//OC.Conversations.initDropDown();
-
-	// positioning app-content if rooms-list 
-	/*
-	if ( $("#controls").length ) {
-		// prevent window scrollbar
-		$("#content").css('height', ($("#content").height()-50) + 'px');
-		$("#app-content").css('top', '44px');
-	}
-	*/
+	// positioning app-content if rooms-list sown
 	if ( $("#app-navigation").length ) {
 		$("#app-content").css('marginLeft', '150px');
 	}
 
 	// activate new msg buttons
-	$("#new-comment-text").click(function(event) {
+		$("#new-comment-text").focus(function() {
 		$("#new-comment-text").css("border-width", "1px");
 		$("#new-comment-buttons").show();
 		$("#new-comment input[type=submit]").removeAttr( 'disabled' );		
@@ -169,30 +106,27 @@ $(document).ready(function(){
 	// texteare autosize
 	$("#new-comment-text").autosize();	
 
-	// select room
-	/*
-	$("#rooms-list .room").click(function(event) {
-		var room = $(this).val();
-
-		$("#rooms-list input").removeClass('active new-msg');
-		$(this).addClass('active');
-
-		$("#new-comment").attr("data-room", room);
-
-		OC.Conversations.LoadConversation();		
-	});	
-	*/
+	// select a room
 	$("#rooms li.user, #rooms li.group").click(function(event) {
 		var room = $(this).attr("data-room");
 
 		$("#rooms li").removeClass('active');
+		$(this).children().children("span").text("");
+		$(this).removeClass('new-msg');
 		$(this).addClass('active');
 
 		//$("#conversation").prepend('<p><img src="'+OC.filePath('core', 'img', 'loading.gif')+'" id="new-comment-loader" /></p');
 
 		$("#new-comment").attr("data-room", room);
 
-		OC.Conversations.LoadConversation();		
+		OC.Conversations.LoadConversation();
+
+		// Reset infinite scroll plugin
+		$('#conversation').infinitescroll('binding','unbind');
+		$('#conversation').data('infinitescroll', null);
+		$(window).unbind('.infscr');
+		 
+		infiniteScroll();
 	});	
 
 	// submit new commnt
@@ -225,31 +159,35 @@ $(document).ready(function(){
 		return false;
 	});
 
-	// infinite scrolling
-	var $container = $('#conversation');
+	infiniteScroll = function() {
+		// infinite scrolling
+		var $container = $('#conversation');
 
-	$container.infinitescroll({
-		navSelector  : '#page-nav',    // selector for the paged navigation
-		nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
-		itemSelector : '.comment',     // selector for all items you'll retrieve
-		pixelsFromNavToBottom: 150,
-		extraScrollPx: 50,
-		prefill: true,
-		path : function(page){
-			var room = $("#new-comment").attr("data-room");
-			return OC.filePath('conversations', 'ajax', 'fetchConversation.php') + '?print_tmpl=true&page=' + page + '&room=' + room;
-		},
-		loading: {
-			finishedMsg: t('conversations', 'No more comments to load'),
-			msgText: t('conversations', 'Loading older comments'),
-			img: OC.filePath('core', 'img', 'loading-dark.gif') 
-		}
-	},       
-    function( nextComments ) {
-		var $nextComm = $( nextComments );
-		$container.append($nextComm);
-	});
+		$container.infinitescroll({
+			navSelector  : '#page-nav',    // selector for the paged navigation
+			nextSelector : '#page-nav a',  // selector for the NEXT link (to page 2)
+			itemSelector : '.comment',     // selector for all items you'll retrieve
+			pixelsFromNavToBottom: 150,
+			extraScrollPx: 50,
+			 debug        : true,   
+			prefill: true,
+			path : function(page){
+				var room = $("#new-comment").attr("data-room");
+				return OC.filePath('conversations', 'ajax', 'fetchConversation.php') + '?print_tmpl=true&page=' + page + '&room=' + room;
+			},
+			loading: {
+				finishedMsg: t('conversations', 'No more comments to load'),
+				msgText: t('conversations', 'Loading older comments'),
+				img: OC.filePath('core', 'img', 'loading-dark.gif') 
+			}
+		},       
+	    function( nextComments ) {
+			var $nextComm = $( nextComments );
+			$container.append($nextComm);
+		});
+	}
+	infiniteScroll();
 
-	// polling interval
-	setInterval( function(){ OC.Conversations.polling(); }, 5000); // TODO polling-time can be increment on time
+	// polling interval // TODO decrement polling-time slowly when nothing happens and on a lot of rooms
+	setInterval( function(){ OC.Conversations.polling(); }, 5000);
 });

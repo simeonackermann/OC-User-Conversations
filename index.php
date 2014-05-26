@@ -35,6 +35,8 @@ OCP\Util::addstyle('conversations', 'style');
 
 // rooms
 $rooms = OC_Conversations::getRooms();
+$updates = OC_Conversations::updateCheck();
+$rooms = array_merge_recursive($rooms, $updates);
 
 // get the page that is requested. Needed for endless scrolling
 $count = 5;
@@ -46,11 +48,14 @@ if (isset($_GET['page'])) {
 $nextpage = \OCP\Util::linkToAbsolute('conversations', 'index.php', array('page' => $page + 2));
 
 $tmpl = new OCP\Template( 'conversations', 'main', 'user' );
-if ( count($rooms) > 1 )
-	$tmpl->assign( 'rooms' , $rooms );
+
+$tmpl->assign( 'rooms' , $rooms );
+
 if ($page == 0)
 	$tmpl->assign('nextpage', $nextpage);
-$tmpl->assign( 'active_room' , OC_Conversations::getRoom() );
-$tmpl->assign( 'conversation' , OC_Conversations::getConversation($active_room, $page * $count, $count) );
+
+$room = OC_Conversations::getRoom();
+$tmpl->assign( 'active_room' , $room);
+$tmpl->assign( 'conversation' , OC_Conversations::getConversation($room, $page * $count, $count) );
 
 $tmpl->printPage();

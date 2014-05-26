@@ -27,7 +27,7 @@ OCP\JSON::callCheck();
 
 $room = isset( $_REQUEST['room'] ) ? $_REQUEST['room'] : false;
 
-// TODO: test if user is in this room !
+// TODO: remove room argument!
 
 if ( $room ) {
 
@@ -43,7 +43,7 @@ if ( $room ) {
 
 	// load room
     $tmpl = new OCP\Template( 'conversations' , 'part.conversation' );
-    $tmpl->assign( 'conversation' , OC_Conversations::getConversation($room, $page * $count, $count, $from_id) );
+    $tmpl->assign( 'conversation' , OC_Conversations::getConversation(false, $page * $count, $count, $from_id) );
 
     if ( isset($_REQUEST['print_tmpl']) ) {
     	// print for infinite scroll

@@ -27,6 +27,4 @@ OCP\JSON::callCheck();
 
 $update = OC_Conversations::updateCheck();
 
-OC_Conversations::setUserRoomTime();
-
 OCP\JSON::success(array('data' => $update ));

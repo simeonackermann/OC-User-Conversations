@@ -12,42 +12,15 @@
 	height: auto;
 	y-overflow: auto;
 	max-width: 800px;
-	padding: 0px 40px 0px 40px;		
+	padding: 25px 40px 0px 40px;		
 }
 #page-nav {
 	margin: 0 0 40px 0;
 	height: 10px;
 }
-/*
-#rooms-list {
-	padding: 0px 15px 0px 20px;
-}
-#rooms-list label {
-	font-weight: bold;
-	margin-right: 5px;
-	color: #555;
-}
-#rooms-list input {
-	padding: 0 20px;
-	height: 44px;
-	border: none;
-	border-right: 1px solid rgba(190, 190, 190, 0.898);
-	border-left: 1px solid rgba(190, 190, 190, 0.898);
-	margin: 0;
-	margin-left: -1px;
-	border-radius: 0;
-	text-transform: uppercase;	
-}
-#rooms-list .active {
-	background: #ccc;	
-}
-#rooms-list .new-msg {
-	background-image: url('%appswebroot%/conversations/img/blink.gif');
-}
-*/
-/*#rooms .group + .user {*/
-#rooms .user-label {
-	border-top: 1px dashed #ccc;
+
+#rooms li + li.user-label {
+	margin-top: 15px;
 }
 #rooms .active {
 	font-weight: bold;
@@ -58,7 +31,7 @@
 	float: left;
 }
 #rooms .new-msg {
-	//background-image: url('%appswebroot%/conversations/img/blink.gif');
+	/*background-image: url('%appswebroot%/conversations/img/blink.gif');*/
 	text-shadow: 0px 0px 0px #555;
 }
 #rooms label {
@@ -72,6 +45,7 @@
 	width:70%; 
 	border:1px solid #ccc;
 	margin: 7px 0 10px 0;
+	border-radius: 3px;
 }
 @media all and (max-width: 480px) {
 	#new-comment {
@@ -207,4 +181,9 @@
 	text-align: center;
 	width: 200px;
 	z-index: 100;
+}
+
+#firstrun {
+	height: 100%;
+	
 }

@@ -24,15 +24,16 @@
 /*
 ### CONFIG ###
 ----------------------------------------------------- */
-/* User can delete own posts, admin can delete all */
+/* Allow that users can delete own posts, admin can delete all */
 define('USER_CONVERSATIONS_CAN_DELETE', true);
 
 
-define('UC_ROOM_ONLY_MSGS', false);
+/* Allow messages to a single user */
+define('UC_SINGLE_USER_MSG', true);
 
 
 /* FILE ATACHMENTS 
-This is an alpha feature with some known bugs (see todo.txt). It could changed in a future release without backward compatibility! */
+This is a beta feature with some known bugs. It could changed in a future release without backward compatibility! */
 define('USER_CONVERSATIONS_ATTACHMENTS', true);
 
 /* end of configration ------------------------------ */
@@ -41,7 +42,7 @@ define('USER_CONVERSATIONS_ATTACHMENTS', true);
 // register model-file
 OC::$CLASSPATH['OC_Conversations'] = 'conversations/lib/conversations.php';
 
-// register change user group
+// register HOOK change user group
 OC_HOOK::connect('OC_User', 'post_addToGroup', 'OC_Conversations', 'changeUserGroup');
 OC_HOOK::connect('OC_User', 'post_removeFromGroup', 'OC_Conversations', 'changeUserGroup');
 
