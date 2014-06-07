@@ -1,0 +1,13 @@
+<?php $TRANSLATIONS = array(
+"Conversation" => "Conversación",
+"Groups" => "Grupos",
+"User" => "Usuario",
+"Message"	=> "Mensaje",
+"Submit"	=> "Enviar",
+"Add file" => "Agregar archivo",
+"Select file" => "Seleccionar archivo",
+"The file will be shared with the %s group." => "El archivo será compartido con el grupo %s.",
+"yesterday"	=> "ayer",
+"Loading older comments" => "Cargando comentarios más antiguos",
+"No more comments to load" => "No hay más comentarios para cargar",
+);
