@@ -1,41 +1,51 @@
+#content {
+	color: #555;
+}
+#app-navigation {
+	width: 150px;	
+	position: fixed;
+}
+
 #app-content {	
 	position: relative;	
 	width: 80%;
 	height: auto;
+	y-overflow: auto;
 	max-width: 800px;
-	margin: 0px 0px 0px 40px;
-	padding: 0px 40px 0px 40px;		
+	padding: 25px 40px 0px 40px;		
 }
-#rooms-list {
-	padding: 0px 15px 0px 20px;
+#page-nav {
+	margin: 0 0 40px 0;
+	height: 10px;
 }
-#rooms-list label {
+
+#rooms li + li.user-label {
+	margin-top: 15px;
+}
+#rooms .active {
 	font-weight: bold;
-	margin-right: 5px;
 	color: #555;
 }
-#rooms-list input {
-	padding: 0 20px;
-	height: 44px;
-	border: none;
-	border-right: 1px solid rgba(190, 190, 190, 0.898);
-	border-left: 1px solid rgba(190, 190, 190, 0.898);
-	margin: 0;
-	margin-left: -1px;
-	border-radius: 0;
-	text-transform: uppercase;	
+#rooms img {
+	margin: 5px 3px 0 0;
+	float: left;
 }
-#rooms-list .active {
-	background: #ccc;	
+#rooms .new-msg {
+	/*background-image: url('%appswebroot%/conversations/img/blink.gif');*/
+	text-shadow: 0px 0px 0px #555;
 }
-#rooms-list .new-msg {
-	background-image: url('%appswebroot%/conversations/img/blink.gif');
+#rooms label {
+	padding: 6px 6px;
+	font-weight: bold;
+	font-style: italic;
+	display: block;
 }
 
 #new-comment {	
 	width:70%; 
 	border:1px solid #ccc;
 	margin: 7px 0 10px 0;
+	border-radius: 3px;
 }
 @media all and (max-width: 480px) {
 	#new-comment {
@@ -101,7 +111,6 @@
 
 .comment {
 	margin-bottom: 15px;
-	color: #555;
 }
 
 .comment-header {
@@ -116,22 +125,19 @@
 }
 .comment-header .author {
 	float: left;
-	font-weight: bold;
 	vertical-align: baseline;
 	padding: 5px 0 0 5px;
 }
-
 .comment-header .date {
-	float: right;
+	float: left;
 	color: gray;
 	padding: 5px 0 0 5px;
 }
-
+.comment-header time:hover {
+	cursor: pointer;
+}
 .comment-header .delete {
 	float: right;
-	/* position: absolute;
-	right: 14px;
-	margin-top: -9px; */
 }
 
 .comment-header a.action.delete {
@@ -172,4 +178,9 @@
 	text-align: center;
 	width: 200px;
 	z-index: 100;
+}
+
+#firstrun {
+	height: 100%;
+	
 }

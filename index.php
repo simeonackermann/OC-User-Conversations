@@ -31,10 +31,21 @@ OCP\App::setActiveNavigationEntry( 'conversations' );
 OCP\Util::addscript('conversations','conversations');
 OCP\Util::addScript('conversations', 'jquery.infinitescroll.min');
 OCP\Util::addScript('conversations', 'jquery.autosize.min');
+OCP\Util::addScript('conversations', 'jquery.timeago');
 OCP\Util::addstyle('conversations', 'style');
+
+// add timeago translations
+$lang = OC_L10N::findLanguage('conversations');
+if ( in_array($lang, OC_L10N::findAvailableLanguages('conversations')) && file_exists( './apps/conversations/js/jquery.timeago.'.$lang.'.js') ) {
+	OCP\Util::addScript('conversations', 'jquery.timeago.' . $lang);
+}
+
+
 
 // rooms
 $rooms = OC_Conversations::getRooms();
+$updates = OC_Conversations::updateCheck();
+$rooms = array_merge_recursive($rooms, $updates);
 
 // get the page that is requested. Needed for endless scrolling
 $count = 5;
@@ -46,9 +57,14 @@ if (isset($_GET['page'])) {
 $nextpage = \OCP\Util::linkToAbsolute('conversations', 'index.php', array('page' => $page + 2));
 
 $tmpl = new OCP\Template( 'conversations', 'main', 'user' );
-if ( count($rooms) > 1 ) $tmpl->assign( 'rooms' , $rooms );
-if ($page == 0) $tmpl->assign('nextpage', $nextpage);
-$tmpl->assign( 'active_room' , OC_Conversations::getRoom() );
-$tmpl->assign( 'conversation' , OC_Conversations::getConversation($page * $count, $count) );
+
+$tmpl->assign( 'rooms' , $rooms );
+
+if ($page == 0)
+	$tmpl->assign('nextpage', $nextpage);
+
+$room = OC_Conversations::getRoom();
+$tmpl->assign( 'active_room' , $room);
+$tmpl->assign( 'conversation' , OC_Conversations::getConversation($room, $page * $count, $count) );
 
 $tmpl->printPage();

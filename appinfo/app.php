@@ -24,12 +24,17 @@
 /*
 ### CONFIG ###
 ----------------------------------------------------- */
-/* User can delete own posts, admin can delete all */
+/* Allow that users can delete own posts, admin can delete all */
 define('USER_CONVERSATIONS_CAN_DELETE', true);
 
+
+/* Allow messages to a single user */
+define('UC_SINGLE_USER_MSG', true);
+
+
 /* FILE ATACHMENTS 
-This is an alpha feature with some known bugs (see todo.txt). It could changed in a future release without backward compatibility! */
-define('USER_CONVERSATIONS_ATTACHMENTS', false);
+This is a beta feature with some known bugs. It could changed in a future release without backward compatibility! */
+define('USER_CONVERSATIONS_ATTACHMENTS', true);
 
 /* end of configration ------------------------------ */
 
@@ -37,21 +42,20 @@ define('USER_CONVERSATIONS_ATTACHMENTS', false);
 // register model-file
 OC::$CLASSPATH['OC_Conversations'] = 'conversations/lib/conversations.php';
 
-// register change user group
+// add update script to change the app-icon
+if ( ! OCP\App::checkAppEnabled('conversations') ) {
+	OCP\Util::addscript('conversations','updateCheck');
+}
+
+// register HOOK change user group
 OC_HOOK::connect('OC_User', 'post_addToGroup', 'OC_Conversations', 'changeUserGroup');
 OC_HOOK::connect('OC_User', 'post_removeFromGroup', 'OC_Conversations', 'changeUserGroup');
-
-$icon = 'conversations.png';
-$updates = OC_Conversations::updateCheck();
-if ( ! empty ( $updates ) ) {
-	$icon = 'conversations_red.png';
-}
 
 $l=OC_L10N::get('conversations');
 OCP\App::addNavigationEntry( array( 
 	'id' => 'conversations',
 	'order' => 5,
 	'href' => OCP\Util::linkTo( 'conversations', 'index.php' ),
-	'icon' => OCP\Util::imagePath( 'conversations', $icon ),
+	'icon' => OCP\Util::imagePath( 'conversations', 'conversations.png' ),
 	'name' => $l->t('Conversation'),
 ));

@@ -69,13 +69,19 @@ if ( $path ) {
 		"owner"		=> $owner
 	);
 
+	$room_arr = explode(":", $room);
+
 	$l=OC_L10N::get('conversations');	
 	// store attachment template into variable
 	$tmpl = new OCP\Template( 'conversations' , 'part.attachment' );
     $tmpl->assign( 'attachment' , $tmpl_arr );
     ob_start();
     	$tmpl->printPage();
-    	echo '<p>' . ($l->t("The file will be shared with the %s group.", $room)) . '</p>';
+    	if ( $room_arr[0] == "group" ) {
+    		echo '<p>' . ($l->t("The file will be shared with the %s group.", $room_arr[1])) . '</p>';
+    	} else {
+    		echo '<p>' . ($l->t("The file will be shared with the user %s.", $room_arr[1])) . '</p>';
+    	}
 		$html = ob_get_contents();
 	ob_end_clean();
 

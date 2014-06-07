@@ -1,24 +1,33 @@
 # User Conversations #
 
-This app provides a simple and clean possibility to have conversations/discussions between users.
+This app for ownCloud provides a simple and clean possibility to have conversations, discussions and chats between users and groups.
 
-AThe conversations are divided into the groups of the users if any available.
 
 ## Features: 
 
- * have conversations between user roups
- * seperate rooms for user groups
- * ajax polling
- * global new message detection
- * includes user profile picture
- * user can delete their own msgs, admins all
- * highlighting new msgs
- * Alpha-feature: file attachments (yet deactivated by default). Can activated in appinfo/app.php. Use it with care.
+* conversations between users and groups
+* seperate group rooms and single user rooms
+* attach files from ownCloud files _(please deactivate it in appinfo/app.php if you have problems)_
+* dynamically new message detection and highlighting
+* users can delete their own messages, admins all
+* user profile pictures
+* clickable hyperlinks
 
 
 ## Install:
 
- * download and unzip to apps/conversations folder
- * activate it in oc backend
+* download and unzip to /owncloud/apps/conversations
+* activate it at ownCloud backend
+* **for group conversations:** adding users to one group in owncloud user settings
 
-Attention: this is beta software
+
+## Configure: 
+
+* deleting, single messages and attachments can activated/deactivated in the file appinfo/app.php
+* groups are the same groups as the owncloud user groups
+
+
+Release information on [GitHub](https://github.com/simeonackermann/OC-User-Conversations/releases)
+
+
+_This is beta software, use it with care._
