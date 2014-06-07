@@ -20,7 +20,7 @@ OC.Conversations = {
 				if ( highlight ) 
 					$(".comment:first-child").effect("bounce", {}, 400);
 
-				$("time.timeago").timeago();
+				$("time.timeago").timeago(); // init timeago on change room
             }
         }, 'json');
 	},
@@ -100,8 +100,8 @@ OC.Conversations = {
 
 $(document).ready(function(){
 
-	// positioning app-content if rooms-list sown
-	if ( $("#app-navigation").length ) {
+	// positioning app-content if rooms-list shown
+	if ( $("#app-navigation").length > 0 ) {
 		$("#app-content").css('marginLeft', '150px');
 	}
 
@@ -182,6 +182,7 @@ $(document).ready(function(){
 		return false;
 	});
 
+	// init timeago on entering app
 	$("time.timeago").timeago();
 
 	infiniteScroll = function() {
@@ -209,7 +210,7 @@ $(document).ready(function(){
 	    function( nextComments ) {
 			var $nextComm = $( nextComments );
 			$container.append($nextComm);
-			$("time.timeago").timeago();
+			$("time.timeago").timeago(); // init timeage for the next comments
 		});
 	}
 	infiniteScroll();
