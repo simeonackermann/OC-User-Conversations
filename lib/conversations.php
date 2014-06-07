@@ -206,15 +206,14 @@ class OC_Conversations
 			if ( $room['type'] == "group" ) {
 				$conf = OCP\Config::getAppValue( 'conversations', 'conf', false );
 				$conf = ( ! $conf ) ? array() : unserialize( $conf );
-				$wtime = $conf['rooms'][$rkey]['wtime'];
+				$wtime = @$conf['rooms'][$rkey]['wtime'];
 				//$lastmsg = $conf['rooms'][$rkey]['lastmsg'];
 			} else {
 				$u2conf = OCP\Config::getUserValue( $room['name'], 'conversations', 'conf', false );
 				$u2conf = ( ! $u2conf ) ? array() : unserialize( $u2conf );
-				$wtime = $u2conf['rooms']['user:'.$userId]['wtime'];
-				//$lastmsg = $u2conf['rooms']['user:'.$userId]['lastmsg'];
+				$wtime = @$u2conf['rooms']['user:'.$userId]['wtime']; // @ if user didnt logged in yet -> key rooms not exist				
 			}
-			$urtime = $uconf['rooms'][$rkey]['rtime'];
+			$urtime = @$uconf['rooms'][$rkey]['rtime'];
 
 			//$ulastmsg = $uconf['rooms'][$rkey]['lastmsg'];
 			if ( $wtime > $urtime ) {
@@ -326,7 +325,7 @@ class OC_Conversations
 
 		$item_shared = self::isItemSharedWithGroup( true, 'file', $attachment['owner'], urldecode($attachment['path']) );
 		if ( ! $item_shared ) {
-			$share_type = ( $roomh[0] == "group" ) ? OCP\Share::SHARE_TYPE_GROUP : OCP\Share::SHARE_TYPE_USER;
+			$share_type = ( $room[0] == "group" ) ? OCP\Share::SHARE_TYPE_GROUP : OCP\Share::SHARE_TYPE_USER;
 			\OCP\Share::shareItem('file', $attachment['fileid'], $share_type, $room[1], 17);
 		}
 	}

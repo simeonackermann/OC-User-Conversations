@@ -42,21 +42,20 @@ define('USER_CONVERSATIONS_ATTACHMENTS', true);
 // register model-file
 OC::$CLASSPATH['OC_Conversations'] = 'conversations/lib/conversations.php';
 
+// add update script to change the app-icon
+if ( ! OCP\App::checkAppEnabled('conversations') ) {
+	OCP\Util::addscript('conversations','updateCheck');
+}
+
 // register HOOK change user group
 OC_HOOK::connect('OC_User', 'post_addToGroup', 'OC_Conversations', 'changeUserGroup');
 OC_HOOK::connect('OC_User', 'post_removeFromGroup', 'OC_Conversations', 'changeUserGroup');
-
-$icon = 'conversations.png';
-$updates = OC_Conversations::updateCheck();
-if ( ! empty ( $updates ) ) {
-	$icon = 'conversations_red.png';
-}
 
 $l=OC_L10N::get('conversations');
 OCP\App::addNavigationEntry( array( 
 	'id' => 'conversations',
 	'order' => 5,
 	'href' => OCP\Util::linkTo( 'conversations', 'index.php' ),
-	'icon' => OCP\Util::imagePath( 'conversations', $icon ),
+	'icon' => OCP\Util::imagePath( 'conversations', 'conversations.png' ),
 	'name' => $l->t('Conversation'),
 ));

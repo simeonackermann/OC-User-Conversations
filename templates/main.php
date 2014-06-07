@@ -1,4 +1,5 @@
 <?php 
+
 if ( isset ($_['rooms']) ) : 
 
 	if ( UC_SINGLE_USER_MSG || count($_['rooms']) > 1 ) : ?>
@@ -8,6 +9,7 @@ if ( isset ($_['rooms']) ) :
 				<?php 
 				$showGroups = true;
 				$showUsers = true;
+				$newMsgCounter = 0;
 				foreach($_['rooms'] as $rid => $room) :
 					$room_name = $room['name'];
 					if ( $room['type'] == "group" && $showGroups ) {
@@ -22,16 +24,24 @@ if ( isset ($_['rooms']) ) :
 							<li class='user-label'><label><?php p($l->t("User")); ?></label></li>
 						<?php }
 					} ?>
-					<li class="<?php p($room['type']); ?> <?php if ($rid == $_['active_room']) p('active'); ?> <?php if ( $room['newmsgs'] ) p('new-msg'); ?>"
+					<li class="<?php p($room['type']); ?> <?php if ($rid == $_['active_room']) p('active'); ?> <?php if ( isset($room['newmsgs']) ) p('new-msg'); ?>"
 						data-type="<?php p($room['type']); ?>" data-room="<?php p($rid); ?>">
 						<a class="" role="button">
 							<?php if ( !empty($avatar) ) { ?><img src="<?php p($avatar); ?>" /><?php }
 							p($room_name); ?>
-							<span><?php if ( $room['newmsgs'] && $rid != $_['active_room']) p("(" . $room['newmsgs'] . ")"); ?></span>
+							<span>
+								<?php
+								if ( isset($room['newmsgs']) && $rid != $_['active_room']) {
+									p("(" . $room['newmsgs'] . ")"); 
+									$newMsgCounter = $newMsgCounter + $room['newmsgs'];
+								}
+								?>
+							</span>
 						</a>
 					</li>
 				<?php endforeach; ?>
 			</ul>
+			<input type="hidden" id="uc-new-msg-counter" value="<?php echo $newMsgCounter; ?>" />
 		</div>
 
 	<?php endif; ?>

@@ -50,6 +50,11 @@ OC.Conversations = {
 		$.post(OC.filePath('conversations', 'ajax', 'polling.php'), {
         }, function(jsondata) {
             if(jsondata.status == 'success') {
+            	if( jsondata.data.length != 0 ) {
+            		$('#navigation li[data-id="conversations"] img').attr ("src", OC.filePath('conversations', 'img', 'conversations_red.png') );
+            		//$('#navigation li[data-id="conversations"] a').attr ("title", 'There are new messages' );
+            	}
+            	var allNewMsgs = 0;
             	for ( var rkey in jsondata.data) {            		
             		if ( rkey ==  $("#new-comment").attr("data-room") ) {
             			// new msgs in current room
@@ -61,9 +66,10 @@ OC.Conversations = {
             			var rkeyclass = rkey.replace(/:/g, "-");
             			$("li[data-room='" + rkey + "']").addClass('new-msg');            			
             			$("li[data-room='" + rkey + "'] span").text( "(" + newmsgs + ")");
-            		}
-            		
-            	}
+            			allNewMsgs = allNewMsgs+newmsgs;
+            		}            		            	
+            	}            	
+            	$("#uc-new-msg-counter").val( allNewMsgs );
             }
         }, 'json');
 	},
@@ -97,6 +103,11 @@ $(document).ready(function(){
 		$("#app-content").css('marginLeft', '150px');
 	}
 
+	// set default app icon on entering app when no new msgs
+	if ( $("#uc-new-msg-counter").val() == 0 ) {
+		$('#navigation li[data-id="conversations"] img').attr ("src", OC.filePath('conversations', 'img', 'conversations.png') );
+	}
+
 	// activate new msg buttons
 		$("#new-comment-text").focus(function() {
 		$("#new-comment-text").css("border-width", "1px");
@@ -111,6 +122,7 @@ $(document).ready(function(){
 		var room = $(this).attr("data-room");
 
 		$("#rooms li").removeClass('active');
+		var thisNewMsg = $(this).children().children("span").text();
 		$(this).children().children("span").text("");
 		$(this).removeClass('new-msg');
 		$(this).addClass('active');
@@ -121,11 +133,20 @@ $(document).ready(function(){
 
 		OC.Conversations.LoadConversation();
 
-		// Reset infinite scroll plugin
+		// set default app icon when all room-messages where read
+		if ( thisNewMsg != "" ) {
+			thisNewMsg = parseInt( thisNewMsg.substring( 1, thisNewMsg.length-1 ) );
+			var allNewMsgs = parseInt( $("#uc-new-msg-counter").val() );
+			$("#uc-new-msg-counter").val( allNewMsgs-thisNewMsg );
+			if ( $("#uc-new-msg-counter").val() == "0" ) {
+				$('#navigation li[data-id="conversations"] img').attr ("src", OC.filePath('conversations', 'img', 'conversations.png') );
+			}
+		}
+
+		// Reset infinite scroll plugin and call again
 		$('#conversation').infinitescroll('binding','unbind');
 		$('#conversation').data('infinitescroll', null);
-		$(window).unbind('.infscr');
-		 
+		$(window).unbind('.infscr');		 
 		infiniteScroll();
 	});	
 
@@ -189,5 +210,5 @@ $(document).ready(function(){
 	infiniteScroll();
 
 	// polling interval // TODO decrement polling-time slowly when nothing happens and on a lot of rooms
-	setInterval( function(){ OC.Conversations.polling(); }, 5000);
+	setInterval( function(){ OC.Conversations.polling(); }, 5000);	
 });
