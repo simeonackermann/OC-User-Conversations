@@ -125,22 +125,19 @@
 }
 .comment-header .author {
 	float: left;
-	font-weight: bold;
 	vertical-align: baseline;
 	padding: 5px 0 0 5px;
 }
-
 .comment-header .date {
-	float: right;
+	float: left;
 	color: gray;
 	padding: 5px 0 0 5px;
 }
-
+.comment-header time:hover {
+	cursor: pointer;
+}
 .comment-header .delete {
 	float: right;
-	/* position: absolute;
-	right: 14px;
-	margin-top: -9px; */
 }
 
 .comment-header a.action.delete {

@@ -1,6 +1,3 @@
-<?php if ( empty($_['conversation'])) 
-	//echo "<i>No comments to load.</i>";
-?>
 <?php foreach ($_['conversation'] as $post) : 
 	$post = OC_Conversations::preparePost($post);
 	extract($post); ?>
@@ -12,17 +9,16 @@
 				</div>
 			<?php } ?>
 			<div class="author">
-				<?php p( $author ); ?>
-			</div>			
+				<strong><?php p( $author ); ?></strong>				
+			</div>
+			<div class="date">
+				<time class="timeago" datetime="<?php p($date['ISO8601']); ?>"><?php p($date['datetime']); ?></time>
+			</div>
 			<?php 
 			$uid = OC_User::getUser();
 			if( USER_CONVERSATIONS_CAN_DELETE && ( OC_User::isAdminUser($uid) || $author == $uid ) ): ?>
 				<div class="delete"><a href="#" class="action delete delete-icon"></a></div>
 			<?php endif; ?>
-			<div class="date">
-				<?php p($l->t($date["text"], $date["val"])); ?>
-			</div>
-
 		</div>
 		<?php if ( ! empty($text) ) { ?>
 			<div class="comment-text">

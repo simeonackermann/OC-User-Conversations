@@ -228,15 +228,15 @@ class OC_Conversations
 	/*
 	Prepare post before display */
 	public static function preparePost($post) {
-		$date = self::formatDate($post['date']);
+		$dateTimeObj = new DateTime($post['date']);
 		return array(
 			"id"		=> $post['id'],
 			"avatar"	=> self::getUserAvatar($post['author']),
 			"author"	=> OC_User::getDisplayName($post['author']),
 			"date"		=> array(
-				"text"	=> $date['text'],
-				"val"	=> $date['val'],
-			),
+								'ISO8601' => $dateTimeObj->format(DateTime::ISO8601),
+								'datetime'=>  date( 'Y-m-d H:i\h', strtotime($post['date']) )
+				),
 			"text"		=> (empty($post['text'])) ? "" : self::formatComment($post['text']),
 			"attachment"=> (empty($post['attachment'])) ? "" : self::getAttachment($post['attachment']),
 			"room"		=> $post['room'],
@@ -401,43 +401,6 @@ class OC_Conversations
 		if ( self::$avatars[$user] != '' )
 			return self::$avatars[$user];
 		return '';
-	}
-
-	/*
-	Get nice date from timestamp */ 
-	public static function formatDate($date)
-	{
-		$result = array("text" => "", "val" => "");
-		$date_time = strtotime($date);
-		$time = time();		
-		if ( $time > $date_time + (7*24*60*60) ) {
-			$lang = OCP\Config::getUserValue(OC_User::getUser(), 'core', 'lang', 'en');
-			if ($lang == "de") {
-				$result["text"] = "%s Uhr";
-				$result["val"] = date( 'd.m. - H:i', $date_time);
-			} else {
-				$result["text"] = "%s";
-				$result["val"] = date( 'jS M h:i a', $date_time);
-			}
-		} elseif ( $time > $date_time + (2*24*60*60) ) {
-			$days = round( ($time - $date_time) / 60 / 60 / 24 );
-			$result["text"] = ( $days > 1 ) ? "%s days ago" : "%s day ago";
-			$result["val"] = $days;
-		} elseif ( $time > $date_time + (24*60*60) ) {
-			$result["text"] = "yesterday";
-		} elseif ( $time > $date_time + (60*60) ) {
-			$hours = round( ($time - $date_time) / 60 / 60 );
-			$result["text"] = ( $hours > 1) ? "%s hours ago" : "%s hour ago";
-			$result["val"] = $hours;
-		} elseif ( $time > $date_time + (60) ) {
-			$minutes = round( ($time - $date_time) / 60 );
-			$result["text"] = ( $minutes > 1 ) ? "%s minutes ago": "%s minute ago";
-			$result["val"] = $minutes;
-		} else {
-			$result["text"] = "just now";
-		}
-
-		return $result;
 	}
 
 	/*

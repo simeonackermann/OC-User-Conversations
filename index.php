@@ -31,7 +31,16 @@ OCP\App::setActiveNavigationEntry( 'conversations' );
 OCP\Util::addscript('conversations','conversations');
 OCP\Util::addScript('conversations', 'jquery.infinitescroll.min');
 OCP\Util::addScript('conversations', 'jquery.autosize.min');
+OCP\Util::addScript('conversations', 'jquery.timeago');
 OCP\Util::addstyle('conversations', 'style');
+
+// add timeago translations
+$lang = OC_L10N::findLanguage('conversations');
+if ( in_array($lang, OC_L10N::findAvailableLanguages('conversations')) && file_exists( './apps/conversations/js/jquery.timeago.'.$lang.'.js') ) {
+	OCP\Util::addScript('conversations', 'jquery.timeago.' . $lang);
+}
+
+
 
 // rooms
 $rooms = OC_Conversations::getRooms();

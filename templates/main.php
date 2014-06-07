@@ -1,5 +1,4 @@
 <?php 
-
 if ( isset ($_['rooms']) ) : 
 
 	if ( UC_SINGLE_USER_MSG || count($_['rooms']) > 1 ) : ?>

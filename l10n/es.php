@@ -8,13 +8,6 @@
 "Select file" => "Seleccionar archivo",
 "The file will be shared with the %s group." => "El archivo será compartido con el grupo %s.",
 "yesterday"	=> "ayer",
-"%s minute ago" => "hace %s minuto",
-"%s minutes ago" => "hace %s minutos",
-"%s hour ago" => "hace %s hora",
-"%s hours ago" => "hace %s horas",
-"%s day ago" => "hace %s día",
-"%s days ago" => "hace %s días",
-"just now" => "ahora",
 "Loading older comments" => "Cargando comentarios más antiguos",
 "No more comments to load" => "No hay más comentarios para cargar",
 );

@@ -19,6 +19,8 @@ OC.Conversations = {
 					$("#new-comment-loader").remove(); 
 				if ( highlight ) 
 					$(".comment:first-child").effect("bounce", {}, 400);
+
+				$("time.timeago").timeago();
             }
         }, 'json');
 	},
@@ -131,7 +133,7 @@ $(document).ready(function(){
 
 		$("#new-comment").attr("data-room", room);
 
-		OC.Conversations.LoadConversation();
+		OC.Conversations.LoadConversation();		
 
 		// set default app icon when all room-messages where read
 		if ( thisNewMsg != "" ) {
@@ -180,6 +182,8 @@ $(document).ready(function(){
 		return false;
 	});
 
+	$("time.timeago").timeago();
+
 	infiniteScroll = function() {
 		// infinite scrolling
 		var $container = $('#conversation');
@@ -205,6 +209,7 @@ $(document).ready(function(){
 	    function( nextComments ) {
 			var $nextComm = $( nextComments );
 			$container.append($nextComm);
+			$("time.timeago").timeago();
 		});
 	}
 	infiniteScroll();
