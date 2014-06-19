@@ -35,12 +35,10 @@ OCP\Util::addScript('conversations', 'jquery.timeago');
 OCP\Util::addstyle('conversations', 'style');
 
 // add timeago translations
-$lang = OC_L10N::findLanguage('conversations');
+$lang = OC_L10N::findLanguage('conversations');								// TODO: may find a better solution than file_exists
 if ( in_array($lang, OC_L10N::findAvailableLanguages('conversations')) && file_exists( './apps/conversations/js/jquery.timeago.'.$lang.'.js') ) {
 	OCP\Util::addScript('conversations', 'jquery.timeago.' . $lang);
 }
-
-
 
 // rooms
 $rooms = OC_Conversations::getRooms();

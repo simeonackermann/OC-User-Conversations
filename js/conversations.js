@@ -52,13 +52,10 @@ OC.Conversations = {
 		$.post(OC.filePath('conversations', 'ajax', 'polling.php'), {
         }, function(jsondata) {
             if(jsondata.status == 'success') {
-            	if( jsondata.data.length != 0 ) {
-            		$('#navigation li[data-id="conversations"] img').attr ("src", OC.filePath('conversations', 'img', 'conversations_red.png') );
-            		//$('#navigation li[data-id="conversations"] a').attr ("title", 'There are new messages' );
-            	}
             	var allNewMsgs = 0;
             	for ( var rkey in jsondata.data) {            		
             		if ( rkey ==  $("#new-comment").attr("data-room") ) {
+            			// TODO BUG: dont poll if user submitted a new post until its completed
             			// new msgs in current room
             			var last_id = $(".comment:first-child").attr("data-id");
             			OC.Conversations.LoadConversation( last_id, true );
@@ -70,8 +67,12 @@ OC.Conversations = {
             			$("li[data-room='" + rkey + "'] span").text( "(" + newmsgs + ")");
             			allNewMsgs = allNewMsgs+newmsgs;
             		}            		            	
-            	}            	
-            	$("#uc-new-msg-counter").val( allNewMsgs );
+            	}
+            	$("#uc-new-msg-counter").val( allNewMsgs );            	
+            	if ( allNewMsgs > 0 ) {
+            		OC.Conversations.SetNavigationIcon( 'highlight' );
+					//$('#navigation li[data-id="conversations"] a').attr ("title", 'There are new messages' );	
+            	}
             }
         }, 'json');
 	},
@@ -96,6 +97,14 @@ OC.Conversations = {
 		$("#new-comment-attachment").attr("data-attachment", "");
 		$("#add-attachment").show();
 	},
+
+	SetNavigationIcon : function( highlight ) {
+		if( typeof(highlight) === 'undefined' ) var highlight = null;
+		$.post(OC.filePath('conversations', 'ajax', 'getNavigationIcon.php'), { 'highlight': highlight },
+        function(jsondata) {
+            if(jsondata.status == 'success') $('#navigation li[data-id="conversations"] img').attr ("src", jsondata.icon );
+        }, 'json');
+	}
 }
 
 $(document).ready(function(){
@@ -107,7 +116,7 @@ $(document).ready(function(){
 
 	// set default app icon on entering app when no new msgs
 	if ( $("#uc-new-msg-counter").val() == 0 ) {
-		$('#navigation li[data-id="conversations"] img').attr ("src", OC.filePath('conversations', 'img', 'conversations.png') );
+		OC.Conversations.SetNavigationIcon();
 	}
 
 	// activate new msg buttons
@@ -141,7 +150,7 @@ $(document).ready(function(){
 			var allNewMsgs = parseInt( $("#uc-new-msg-counter").val() );
 			$("#uc-new-msg-counter").val( allNewMsgs-thisNewMsg );
 			if ( $("#uc-new-msg-counter").val() == "0" ) {
-				$('#navigation li[data-id="conversations"] img').attr ("src", OC.filePath('conversations', 'img', 'conversations.png') );
+				OC.Conversations.SetNavigationIcon();
 			}
 		}
 
