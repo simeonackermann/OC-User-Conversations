@@ -56,7 +56,8 @@ $nextpage = \OCP\Util::linkToAbsolute('conversations', 'index.php', array('page'
 
 $tmpl = new OCP\Template( 'conversations', 'main', 'user' );
 
-$tmpl->assign( 'rooms' , $rooms );
+if ( ! empty($rooms) ) 
+	$tmpl->assign( 'rooms' , $rooms );
 
 if ($page == 0)
 	$tmpl->assign('nextpage', $nextpage);
