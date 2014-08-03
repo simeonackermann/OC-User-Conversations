@@ -279,22 +279,27 @@ class OC_Conversations
 	Get internal file attachments for printing posts */
 	private static function getInternalFileAttachment($attachment) {
 		$path = urldecode($attachment['path']);
-		$path = substr($path, strpos($path, "/")+1 ); //remove root folder
+		$path = substr($path, strpos($path, "/")+1 ); //remove root folder "files/"	
+		$userId = OC_User::getUser();
 		
-		if ( $attachment['owner'] == OC_User::getUser() ) {
+		if ( $attachment['owner'] == $userId ) {
 			// file-owner can use own path
 			$path = \OC\Files\Filesystem::getPath($attachment['fileid']);
 		} else {			
-			$item_shared = OCP\Share::getItemSharedWithBySource('file', $attachment['fileid']);			
+			$item_shared = OCP\Share::getItemSharedWithBySource('file', $attachment['fileid']);
 			if ( $item_shared != false ) { // if item is direct shared use shared-file target
-				$path = "/Shared" . $item_shared['file_target'];
+				$path = $item_shared['file_target'];
 			} else {
 				// else search shared parent folder
-				$path = "/Shared/" . self::getInheritedSharedPath( $attachment['owner'], urldecode($attachment['path']) );
+				$path = "/" . self::getInheritedSharedPath( urldecode($attachment['path']), $userId, $attachment['owner'] );
 			}
-		}
-			
-		$userId = OC_User::getUser();
+
+			$ocVersion = OCP\Util::getVersion();
+			if ( $ocVersion[0] < 7 ) {
+				$path = "/Shared" . $path;
+			}
+		}					
+		
 		$view = new \OC\Files\View('/' . $userId . '/files');
 		$fileinfo = $view->getFileInfo($path);
 
@@ -323,7 +328,7 @@ class OC_Conversations
 		$room = self::getRoom();
 		$room = explode(":", $room);
 
-		$item_shared = self::isItemSharedWithGroup( true, 'file', $attachment['owner'], urldecode($attachment['path']) );
+		$item_shared = self::isItemSharedWithGroup( 'file', urldecode($attachment['path']), $room[1], $attachment['owner'],  true);
 		if ( ! $item_shared ) {
 			$share_type = ( $room[0] == "group" ) ? OCP\Share::SHARE_TYPE_GROUP : OCP\Share::SHARE_TYPE_USER;
 			\OCP\Share::shareItem('file', $attachment['fileid'], $share_type, $room[1], 17);
@@ -332,7 +337,7 @@ class OC_Conversations
 
 	/*
 	Test if item is shared with a group */
-	private static function isItemSharedWithGroup($recursiv, $type, $owner, $path) {	
+	private static function isItemSharedWithGroup($type, $path, $share_with, $owner, $recursiv) {	
 		if ( empty($path) || $path == "files" ) 
 			return false;
 		\OC_Util::setupFS($owner);
@@ -340,44 +345,30 @@ class OC_Conversations
 		$view = new \OC\Files\View('/' . $owner . '/files');
 		$fileinfo = $view->getFileInfo( substr($path, strpos($path, "/") ) ); //get fileinfo from path (remove root folder)
 		
-		$share_with = self::getRoom();
-		$share_with = explode(":", $share_with);
+		$room = explode(":", self::getRoom());
+		$share_type = ( $room[0] == "group" ) ? OCP\Share::SHARE_TYPE_GROUP : OCP\Share::SHARE_TYPE_USER;
+		
+		$result = OCP\Share::getItemSharedWithUser($type, $fileinfo['fileid'], $share_with);
 
-		$share_type = ( $share_with[0] == "group" ) ? OCP\Share::SHARE_TYPE_GROUP : OCP\Share::SHARE_TYPE_USER;
-
-		$query = \OC_DB::prepare( 'SELECT `file_target`, `permissions`, `expiration`
-									FROM `*PREFIX*share`
-									WHERE `share_type` = ? AND `item_source` = ? AND `item_type` = ? AND `share_with` = ?' );
-
-		$result = $query->execute( array($share_type, $fileinfo['fileid'], $type, $share_with[1]) )->fetchAll();
-
-		/*
-		if ( count($result) == 0 ) { // item not shared, is parent folder shared?
-			$parent_path = substr($fileinfo['path'], 0, strrpos($fileinfo['path'], "/") );					
-			return self::isItemSharedWithGroup( 'folder', $owner, $parent_path );
-		}
-		return true;
-		*/
-		if ( count($result) == 0 ) { // item not shared, is parent folder shared?
+		if ( empty($result) ) { // item not shared, is parent folder shared?
 			if ( $recursiv ) {
 				$parent_path = substr($fileinfo['path'], 0, strrpos($fileinfo['path'], "/") );					
-				return self::isItemSharedWithGroup(true, 'folder', $owner, $parent_path );
-			} else {
-				return false;
-			}
+				return self::isItemSharedWithGroup('folder', $parent_path, $share_with, $owner, true);
+			} 
+			return false;
 		}
 		return true;
 	}
 
 	/*
 	Get shared path for inherited shared item */
-	private static function getInheritedSharedPath($owner, $path) {
-		$shared_path = substr($path, strrpos($path, "/")+1 ); // filename
+	private static function getInheritedSharedPath( $path, $share_with, $owner) {		
+		$shared_path = basename($path);
 		do {
-			$path = substr($path, 0, strrpos($path, "/") ); // parent path
+			$path = dirname($path);
 			$shared_path = substr($path, strrpos($path, "/")+1 ) . "/" . $shared_path; // shared path + parent folder
 			if ( empty($path) || $path == "files" ) break;
-		} while ( ! self::isItemSharedWithGroup(false, 'folder', $owner, $path) );
+		} while ( ! self::isItemSharedWithGroup('folder', $path, $share_with, $owner, false) );
 
 		return $shared_path;
 	}
