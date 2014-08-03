@@ -109,11 +109,6 @@ OC.Conversations = {
 
 $(document).ready(function(){
 
-	// positioning app-content if rooms-list shown
-	if ( $("#app-navigation").length > 0 ) {
-		$("#app-content").css('marginLeft', '150px');
-	}
-
 	// set default app icon on entering app when no new msgs
 	if ( $("#uc-new-msg-counter").val() == 0 ) {
 		OC.Conversations.SetNavigationIcon();
