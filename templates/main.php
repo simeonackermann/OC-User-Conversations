@@ -71,8 +71,26 @@ if ( isset ($_['rooms']) ) :
 		<?php endif; ?>	
 	</div>
 
+	<?php 
+	$ocVersion = OCP\Util::getVersion();
+	if ( $ocVersion[0] >= 7 ) { ?>
+		<style type="text/css">
+		@media only screen and (min-width: 768px) {
+			#app-content {	
+				margin-left: 250px;
+			}
+		}
+		@media only screen and (max-width: 768px) {
+			#app-content {	
+				padding: 37px 5px 0px 5px;
+				margin-left: 0px;
+			}
+		}		
+		</style>
+	<?php } ?>
+
 <?php else: ?>
 
-	<div id="app-content"><div id="firstrun"><p>Sorry, coulnd't find any user or group. Please create some in <a href="<?php echo OCP\Util::linkTo( 'index.php/settings', 'users' ); ?>">ownCloud user settings</a>.</p></div></div>
+	<div id="app-content"><div id="firstrun"><p>Sorry, coulnd't find any other user or group. Just add some in <a href="<?php echo OCP\Util::linkTo( 'index.php/settings', 'users' ); ?>">ownCloud user settings</a>.</p></div></div>
 
 <?php endif; ?>
