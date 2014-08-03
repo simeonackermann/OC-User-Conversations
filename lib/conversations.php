@@ -298,8 +298,7 @@ class OC_Conversations
 			if ( $ocVersion[0] < 7 ) {
 				$path = "/Shared" . $path;
 			}
-		}					
-		
+		}
 		$view = new \OC\Files\View('/' . $userId . '/files');
 		$fileinfo = $view->getFileInfo($path);
 
