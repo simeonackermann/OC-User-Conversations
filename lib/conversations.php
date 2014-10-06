@@ -232,7 +232,7 @@ class OC_Conversations
 		return array(
 			"id"		=> $post['id'],
 			"avatar"	=> self::getUserAvatar($post['author']),
-			"author"	=> OC_User::getDisplayName($post['author']),
+			"author"	=> $post['author'],
 			"date"		=> array(
 								'ISO8601' => $dateTimeObj->format(DateTime::ISO8601),
 								'datetime'=>  date( 'Y-m-d H:i\h', strtotime($post['date']) )
