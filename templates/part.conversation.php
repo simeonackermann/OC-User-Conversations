@@ -9,7 +9,7 @@
 				</div>
 			<?php } ?>
 			<div class="author">
-				<strong><?php p( $author ); ?></strong>				
+				<strong><?php p(OC_User::getDisplayName($author)); ?></strong>				
 			</div>
 			<div class="date">
 				<time class="timeago" datetime="<?php p($date['ISO8601']); ?>"><?php p($date['datetime']); ?></time>
