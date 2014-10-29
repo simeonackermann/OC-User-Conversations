@@ -7,12 +7,20 @@
 }
 #app-content {	
 	position: relative;	
+	/*
 	width: 80%;
 	height: auto;
-	y-overflow: auto;
+	overflow-y: auto;
 	max-width: 800px;
-	padding: 25px 15px 0px 15px;		
+	padding: 25px 15px 0px 15px;
+	*/	
 	margin-left: 250px;
+
+	height: 100%;
+
+}
+#conversation {
+	padding: 25px 30% 0px 15px;
 }
 #page-nav {
 	margin: 0 0 40px 0;
@@ -42,14 +50,18 @@
 }
 
 #new-comment {	
-	width:70%; 
+	width:50%; 
+	max-width: 600px;
 	border:1px solid #ccc;
-	margin: 7px 0 10px 0;
+	margin: 32px 0 10px 15px;
 	border-radius: 3px;
 }
 @media all and (max-width: 480px) {
 	#new-comment {
-		width: 100%;
+		width: 90%;
+	}
+	#conversation {
+		padding-right: 15px;
 	}
 }
 #new-comment-text {
@@ -111,6 +123,7 @@
 
 .comment {
 	margin-bottom: 15px;
+	max-width: 800px;
 }
 
 .comment-header {
@@ -168,21 +181,21 @@
 	margin: 0 5px -14px 0px;
 }
 
-#infscr-loading { 
-	background: #000000;
-	border-radius: 10px;
-	bottom: 40px;
-	color: #FFFFFF;
-	left: 45%;
-	opacity: 0.8;
-	padding: 10px;
-	position: fixed;
-	text-align: center;
-	width: 200px;
-	z-index: 100;
-}
-
 #firstrun {
 	height: 100%;
 	
+}
+
+#loading_conversation {
+    height: 50px;
+    padding: 20px;
+    margin: 40px;
+    background-position: center left;
+}
+#no_more_conversation,
+#no_conversation { 
+    padding: 50px 0px;
+    z-index: 100;
+    margin: 40px;
+    color: #555;
 }

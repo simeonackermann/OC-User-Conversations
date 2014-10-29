@@ -29,7 +29,6 @@ OCP\App::setActiveNavigationEntry( 'conversations' );
 
 // register js and css
 OCP\Util::addscript('conversations','conversations');
-OCP\Util::addScript('conversations', 'jquery.infinitescroll.min');
 OCP\Util::addScript('conversations', 'jquery.autosize.min');
 OCP\Util::addScript('conversations', 'jquery.timeago');
 OCP\Util::addstyle('conversations', 'style');
@@ -45,25 +44,11 @@ $rooms = OC_Conversations::getRooms();
 $updates = OC_Conversations::updateCheck();
 $rooms = array_merge_recursive($rooms, $updates);
 
-// get the page that is requested. Needed for endless scrolling
-$count = 5;
-if (isset($_GET['page'])) {
-	$page = intval($_GET['page']) - 1;
-} else {
-	$page = 0;
-}
-$nextpage = \OCP\Util::linkToAbsolute('conversations', 'index.php', array('page' => $page + 2));
-
 $tmpl = new OCP\Template( 'conversations', 'main', 'user' );
 
 if ( ! empty($rooms) ) 
 	$tmpl->assign( 'rooms' , $rooms );
 
-if ($page == 0)
-	$tmpl->assign('nextpage', $nextpage);
-
 $room = OC_Conversations::getRoom();
 $tmpl->assign( 'active_room' , $room);
-$tmpl->assign( 'conversation' , OC_Conversations::getConversation($room, $page * $count, $count) );
-
 $tmpl->printPage();

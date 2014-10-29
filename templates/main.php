@@ -62,13 +62,10 @@ if ( isset ($_['rooms']) ) :
 			<?php echo $this->inc('part.conversation'); ?>
 		</div>
 
-		<?php
-		// Dummy navigation. Needed for endless scrolling
-		if (isset($_['nextpage'])) : ?>
-			<nav id="page-nav">
-		  		<a href="<?php p($_['nextpage']); ?>"></a>
-			</nav>
-		<?php endif; ?>	
+		<div id="loading_conversation" class="icon-loading"></div>
+		<div id="no_more_conversation" class="hidden"><?php p($l->t("No more comments to load")); ?></div>
+		<div id="no_conversation" class="hidden"><?php p($l->t("No comments to load")); ?></div>
+
 	</div>
 
 	<?php 
