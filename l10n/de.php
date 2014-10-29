@@ -10,4 +10,5 @@
 "The file will be shared with the user %s." => "Die Datei wird mit dem Benutzer %s geteilt.",
 "Loading older comments" => "Lade ältere Kommentare",
 "No more comments to load" => "Keine weiteren Kommentare verfügbar",
+"No comments to load" => "Keine Kommentare verfügbar",
 );
