@@ -113,19 +113,29 @@ class OC_Conversations
 		foreach (OC_Group::getUserGroups($userId) as $group) {
 			if ( count(OC_Group::usersInGroup($group)) > 1 ) {
 				$grooms["group:".$group] = array( "type" => "group", "name" => $group );
-				/*if ( UC_ROOM_ONLY_MSGS ) { // TODO: option: maybe private msgs only to users in same rooms ?					
-				} */
 			}
 		}
-		// if no group exist create default; NEW in 0.2: no default room!
-		//if ( empty($grooms) )
-		//	$grooms["group:default"] = array( "type" => "group", "name" => "default" );
 
-		// add all other users
+		// add single users
 		if ( UC_SINGLE_USER_MSG == true ) {
-			foreach (OC_User::getUsers() as $user) {
-				if ( $userId != $user ) {
-					$urooms["user:".$user] = array( "type" => "user", "name" => $user );
+			$groupMembersOnly = false;
+			if ( class_exists('OC\\Share\\Share') ) {
+				$groupMembersOnly = OC\Share\Share::shareWithGroupMembersOnly();
+			}
+
+			if ( $groupMembersOnly || UC_SINGLE_USER_MSG_GROUP_ONLY ) {  // add only users in same groups
+				foreach (OC_Group::getUserGroups($userId) as $group) {
+					foreach (OC_Group::usersInGroup($group) as $user) {
+						if ( $userId != $user ) {
+							$urooms["user:".$user] = array( "type" => "user", "name" => $user );
+						}
+					}
+				}
+			} else { // add all other users
+				foreach (OC_User::getUsers() as $user) {
+					if ( $userId != $user ) {
+						$urooms["user:".$user] = array( "type" => "user", "name" => $user );
+					}
 				}
 			}
 		}

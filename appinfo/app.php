@@ -27,10 +27,13 @@
 /* Allow that users can delete own posts, admin can delete all */
 define('USER_CONVERSATIONS_CAN_DELETE', true);
 
-
 /* Allow messages to a single user */
 define('UC_SINGLE_USER_MSG', true);
 
+/* Allow private messages only to users in the same groups
+	This is overwritten by the admin setting 'allow share with group members only'
+	*/
+define('UC_SINGLE_USER_MSG_GROUP_ONLY', false);
 
 /* FILE ATACHMENTS 
 This is a beta feature with some known bugs. It could changed in a future release without backward compatibility! */
