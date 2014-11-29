@@ -120,7 +120,7 @@ OC.Conversations = {
             	var playNotif = false;
             	var playNotifEl = $("#conversations-sound-notif").get(0);
             	for ( var rkey in jsondata.data) {
-            		if ( rkey ==  $("#new-comment"
+            		if ( rkey ==  $("#new-comment").attr("data-room") ) {
             			// TODO BUG: dont poll if user submitted a new post until its completed
             			// new msgs in current room
             			var last_id = $(".comment:first-child").attr("data-id");
