@@ -8,7 +8,7 @@ This app for ownCloud provides a simple and clean possibility to have conversati
 * conversations between users and groups
 * seperate group rooms and single user rooms
 * attach files from ownCloud files _(please deactivate it in appinfo/app.php if you have problems)_
-* dynamically new message detection and highlighting
+* dynamically new message detection, highlighting and sound notification
 * users can delete their own messages, admins all
 * user profile pictures
 * clickable hyperlinks
