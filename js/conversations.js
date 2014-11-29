@@ -117,22 +117,35 @@ OC.Conversations = {
         }, function(jsondata) {
             if(jsondata.status == 'success') {
             	var allNewMsgs = 0;
-            	for ( var rkey in jsondata.data) {            		
-            		if ( rkey ==  $("#new-comment").attr("data-room") ) {
+            	var playNotif = false;
+            	var playNotifEl = $("#conversations-sound-notif").get(0);
+            	for ( var rkey in jsondata.data) {
+            		if ( rkey ==  $("#new-comment"
             			// TODO BUG: dont poll if user submitted a new post until its completed
             			// new msgs in current room
             			var last_id = $(".comment:first-child").attr("data-id");
+            			playNotif = true;
             			OC.Conversations.LoadConversation( last_id, true );
-            		} else {            			
+            		} else {
             			// new msgs in other room
             			var newmsgs = jsondata.data[rkey].newmsgs;
             			var rkeyclass = rkey.replace(/:/g, "-");
-            			$("li[data-room='" + rkey + "']").addClass('new-msg');            			
+
+            			var oldNewMsg = $("li[data-room='" + rkey + "'] span").text().replace(/\(|\)/g, '');
+            			oldNewMsg = parseInt(oldNewMsg);
+            			if ( newmsgs > oldNewMsg ) {
+            				playNotif = true;
+            			}
+
+            			$("li[data-room='" + rkey + "']").addClass('new-msg');
             			$("li[data-room='" + rkey + "'] span").text( "(" + newmsgs + ")");
             			allNewMsgs = allNewMsgs+newmsgs;
-            		}            		            	
+            		}
             	}
-            	$("#uc-new-msg-counter").val( allNewMsgs );            	
+            	$("#uc-new-msg-counter").val( allNewMsgs );
+            	if ( playNotif == true ) {
+            		playNotifEl.play();
+            	}
             	if ( allNewMsgs > 0 ) {
             		OC.Conversations.SetNavigationIcon( 'highlight' );
 					//$('#navigation li[data-id="conversations"] a').attr ("title", 'There are new messages' );	
