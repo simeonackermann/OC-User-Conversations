@@ -1,6 +1,4 @@
 <?php 
-if ( isset ($_['rooms']) ) : 
-
 	if ( UC_SINGLE_USER_MSG || count($_['rooms']) > 1 ) : ?>
 
 		<div id="app-navigation">
@@ -65,7 +63,9 @@ if ( isset ($_['rooms']) ) :
 		<div id="loading_conversation" class="icon-loading"></div>
 		<div id="no_more_conversation" class="hidden"><?php p($l->t("No more comments to load")); ?></div>
 		<div id="no_conversation" class="hidden"><?php p($l->t("No comments to load")); ?></div>
-
+		<audio preload src="<?php p(OC_App::getAppWebPath("conversations") . '/src/new.mp3'); ?>" id="conversations-sound-notif">
+			<source src="<?php p(OC_App::getAppWebPath("conversations") . '/src/new.ogg'); ?>">
+		</audio>
 	</div>
 
 	<?php 
