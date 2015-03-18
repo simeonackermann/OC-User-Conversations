@@ -37,7 +37,7 @@ define('UC_SINGLE_USER_MSG_GROUP_ONLY', false);
 
 /* FILE ATACHMENTS 
 This is a beta feature with some known bugs. It could changed in a future release without backward compatibility! */
-define('USER_CONVERSATIONS_ATTACHMENTS', false);
+define('USER_CONVERSATIONS_ATTACHMENTS', true);
 
 /* end of configration ------------------------------ */
 
