@@ -24,8 +24,7 @@
 // Check if we are a user
 OCP\User::checkLoggedIn();
 OCP\App::checkAppEnabled('conversations');
-
-OCP\App::setActiveNavigationEntry( 'conversations' );
+OCP\App::setActiveNavigationEntry( 'conversations_index' );
 
 // register js and css
 OCP\Util::addscript('conversations','conversations');

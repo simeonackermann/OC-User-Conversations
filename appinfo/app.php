@@ -37,7 +37,7 @@ define('UC_SINGLE_USER_MSG_GROUP_ONLY', false);
 
 /* FILE ATACHMENTS 
 This is a beta feature with some known bugs. It could changed in a future release without backward compatibility! */
-define('USER_CONVERSATIONS_ATTACHMENTS', true);
+define('USER_CONVERSATIONS_ATTACHMENTS', false);
 
 /* end of configration ------------------------------ */
 
@@ -52,11 +52,13 @@ OCP\Util::addscript('conversations','updateCheck');
 OC_HOOK::connect('OC_User', 'post_addToGroup', 'OC_Conversations', 'changeUserGroup');
 OC_HOOK::connect('OC_User', 'post_removeFromGroup', 'OC_Conversations', 'changeUserGroup');
 
-$l=OC_L10N::get('conversations');
+//$l=OC_L10N::get('conversations');
+$l = OCP\Util::getL10N('conversations');
 OCP\App::addNavigationEntry( array( 
-	'id' => 'conversations',
+	'id' => 'conversations_index',
 	'order' => 5,
-	'href' => OCP\Util::linkTo( 'conversations', 'index.php' ),
+	//'href' => OCP\Util::linkTo( 'conversations', 'index.php' ),
+	'href' => OCP\Util::linkToRoute('conversations_index'),
 	'icon' => OCP\Util::imagePath( 'conversations', 'conversations.png' ), // TODO: svg
 	'name' => $l->t('Conversation'),
 ));
