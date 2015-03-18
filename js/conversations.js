@@ -104,12 +104,10 @@ OC.Conversations = {
 		$("#add-attachment").show();
 	},
 
-	SetNavigationIcon : function( highlight ) {
-		if( typeof(highlight) === 'undefined' ) var highlight = null;
-		$.post(OC.filePath('conversations', 'ajax', 'getNavigationIcon.php'), { 'highlight': highlight },
-        function(jsondata) {
-            if(jsondata.status == 'success') $('#navigation li[data-id="conversations"] img').attr ("src", jsondata.icon );
-        }, 'json');
+	SetNavigationIcon : function( highlight ) {		
+		var iconSrc = OC.appswebroots.conversations + "/img/";
+		iconSrc += (typeof(highlight) === 'undefined') ? "conversations.png" : "conversations_red.png";
+		$('#navigation li[data-id="conversations_index"] img').attr ("src", iconSrc );
 	},
 
 	polling : function() {
