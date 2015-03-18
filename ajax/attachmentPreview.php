@@ -23,7 +23,7 @@
 
 OCP\JSON::checkAppEnabled('conversations');
 OCP\JSON::checkLoggedIn();
-OCP\JSON::callCheck();
+//OCP\JSON::callCheck();
 
 
 $path = isset($_POST['path']) ? $_POST['path'] : false;

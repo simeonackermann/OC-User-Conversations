@@ -22,7 +22,7 @@
 */
 
 OCP\JSON::checkLoggedIn();
-OCP\JSON::callCheck();
+//OCP\JSON::callCheck();
 
 $icon = OCP\Util::imagePath( 'conversations','conversations.png' );
 

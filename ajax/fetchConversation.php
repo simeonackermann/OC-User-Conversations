@@ -23,7 +23,7 @@
 
 OCP\JSON::checkAppEnabled('conversations');
 OCP\JSON::checkLoggedIn();
-OCP\JSON::callCheck();
+//OCP\JSON::callCheck();
 
 $room = isset( $_REQUEST['room'] ) ? $_REQUEST['room'] : false;
 
