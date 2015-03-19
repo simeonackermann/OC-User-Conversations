@@ -4,6 +4,7 @@
     "User" : "Usager",
     "Message"   : "Message",
     "Submit"    : "Publier",
+    "New comments": "Nouveaux commentaires",
     "Add file" : "Ajouter un fichier",
     "Select file" : "Sélectionner le fichier",
     "The file will be shared with the %s group." : "Le fichier est partagé avec le groupe %s.",

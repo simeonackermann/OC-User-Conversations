@@ -2,6 +2,7 @@ OC.Conversations = {
 
 	page: -1,
 	ignoreScroll: false,
+	windowFocus: true,
 
 	prefill : function() {
 		if ($('#app-content').scrollTop() + $('#app-content').height() > $('#conversation').height() - 100) {
@@ -106,8 +107,14 @@ OC.Conversations = {
 
 	SetNavigationIcon : function( highlight ) {		
 		var iconSrc = OC.appswebroots.conversations + "/img/";
-		iconSrc += (typeof(highlight) === 'undefined') ? "conversations.png" : "conversations_red.png";
-		$('#navigation li[data-id="conversations_index"] img').attr ("src", iconSrc );
+		if ( typeof(highlight) === 'undefined' ) {
+			iconSrc += "conversations.png";
+			document.title =  t('conversations', 'Conversation') + " - ownCloud";
+		} else {
+			iconSrc += "conversations_red.png";
+			document.title =  t('conversations', 'New comments') + " | " + t('conversations', 'Conversation') + " - " + OC.theme.title;
+		}
+		$('#navigation li[data-id="conversations_index"] img').attr ("src", iconSrc );		
 	},
 
 	polling : function() {
@@ -144,9 +151,16 @@ OC.Conversations = {
             	if ( playNotif == true ) {
             		playNotifEl.play();
             	}
-            	if ( allNewMsgs > 0 ) {
-            		OC.Conversations.SetNavigationIcon( 'highlight' );
-					//$('#navigation li[data-id="conversations"] a').attr ("title", 'There are new messages' );	
+            	// set document title if window doesnt has focus or new msg in other rooms
+            	if ( jsondata.data.length != 0 ) {
+            		if ( ! OC.Conversations.windowFocus ) {
+	            		OC.Conversations.SetNavigationIcon( 'highlight' );
+	            	}
+	            	else if ( OC.Conversations.windowFocus && allNewMsgs > 0 ) {
+	            		OC.Conversations.SetNavigationIcon( 'highlight' );
+	            	}
+            	} else {
+            		OC.Conversations.SetNavigationIcon();
             	}
             }
         }, 'json');
@@ -273,6 +287,13 @@ $(document).ready(function(){
 
 	// polling interval // TODO decrement polling-time slowly when nothing happens and on a lot of rooms
 	setInterval( function(){ OC.Conversations.polling(); }, 5000);	
+
+	// get if window has focus (need it for document title)
+	$(window).focus(function() {
+	    OC.Conversations.windowFocus = true;
+	}).blur(function() {
+	    OC.Conversations.windowFocus = false;
+	});
 
 });
 

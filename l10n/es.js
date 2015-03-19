@@ -6,6 +6,7 @@ OC.L10N.register(
     "User" : "Usuario",
     "Message"   : "Mensaje",
     "Submit"    : "Enviar",
+    "New comments": "Nuevos comentarios",
     "Add file" : "Agregar archivo",
     "Select file" : "Seleccionar archivo",
     "The file will be shared with the %s group." : "El archivo será compartido con el grupo %s.",
