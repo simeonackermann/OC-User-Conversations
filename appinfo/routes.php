@@ -19,9 +19,6 @@ $this->create('conversations_ajax_deleteComment', 'ajax/deleteComment.php')
 $this->create('conversations_ajax_fetchConversation', 'ajax/fetchConversation.php')
 	->actionInclude('conversations/ajax/fetchConversation.php');
 
-$this->create('conversations_ajax_getNavigationIcon', 'ajax/getNavigationIcon.php')
-	->actionInclude('conversations/ajax/getNavigationIcon.php');
-
 $this->create('conversations_ajax_newComment', 'ajax/newComment.php')
 	->actionInclude('conversations/ajax/newComment.php');
 
