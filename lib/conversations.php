@@ -391,7 +391,7 @@ class OC_Conversations
 			$avatar = New OC_Avatar($user);
 			$image = $avatar->get(32);
 			if ($image instanceof OC_Image) {
-				$imageUrl = OC_Helper::linkToRoute ( 'core_avatar_get', array ('user' => $user, 'size' => 32) ) . '?requesttoken='. OC::$session->get('requesttoken');
+				$imageUrl = OC_Helper::linkToRoute ( 'core_avatar_get', array ('user' => $user, 'size' => 32) ) . '?requesttoken='. OC::$server->getSession()->get('requesttoken');
 				self::$avatars[$user] = $imageUrl;
 			} else {
 				self::$avatars[$user] = '';
