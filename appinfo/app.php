@@ -59,6 +59,6 @@ OCP\App::addNavigationEntry( array(
 	'order' => 5,
 	//'href' => OCP\Util::linkTo( 'conversations', 'index.php' ),
 	'href' => OCP\Util::linkToRoute('conversations_index'),
-	'icon' => OCP\Util::imagePath( 'conversations', 'conversations.png' ), // TODO: svg
+	'icon' => OCP\Util::imagePath( 'conversations', 'conversations.svg' ),
 	'name' => $l->t('Conversation'),
 ));
