@@ -90,6 +90,6 @@ if ( isset ($_['rooms']) ) :
 
 <?php else: ?>
 
-	<div id="app-content"><div id="firstrun"><p>Sorry, coulnd't find any other user or group. Just add some in <a href="<?php echo OCP\Util::linkTo( 'index.php/settings', 'users' ); ?>">ownCloud user settings</a>.</p></div></div>
+	<div id="app-content"><div id="no-users"><p>Please add some other users or groups in <a href="<?php echo OCP\Util::linkTo( 'index.php/settings', 'users' ); ?>">ownCloud user settings</a> to start chatting...</p></div></div>
 
 <?php endif; ?>

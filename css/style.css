@@ -181,9 +181,12 @@
 	margin: 0 5px -14px 0px;
 }
 
-#firstrun {
-	height: 100%;
-	
+#no-users {
+	position: absolute;
+	text-align: center;
+	width: 100%;
+	top: 40%;
+	margin-left: -250px;
 }
 
 #loading_conversation {
