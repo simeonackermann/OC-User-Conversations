@@ -59,7 +59,11 @@ if ( isset ($_['rooms']) ) :
 		</form>
 
 		<div id="conversation">
-			<?php echo $this->inc('part.conversation'); ?>
+			<?php 
+			if ( isset($_['conversation']) ) {
+				echo $this->inc('part.conversation'); 
+			}			
+			?>
 		</div>
 
 		<div id="loading_conversation" class="icon-loading"></div>
