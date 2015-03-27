@@ -148,8 +148,8 @@ class OC_Conversations
 	{		
 		$room = OCP\Config::getUserValue(OC_User::getUser(), 'conversations', 'activeRoom', false);
 		if ( $room == false ) {
-			foreach (self::getRooms() as $key => $value) break; // get the first key of rooms
-			$room = $key;
+			foreach (self::getRooms() as $key => $value) break; // get the first key of rooms			
+			$room = isset($key) ? $key : "";
 		}
 		// TODO: return type and title array $room = array( "type" => "...", "label" => ... );
 		return $room;
