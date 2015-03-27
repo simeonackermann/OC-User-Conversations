@@ -108,10 +108,10 @@ OC.Conversations = {
 	SetNavigationIcon : function( highlight ) {		
 		var iconSrc = OC.appswebroots.conversations + "/img/";
 		if ( typeof(highlight) === 'undefined' ) {
-			iconSrc += "conversations.png";
+			iconSrc += "conversations.svg";
 			document.title =  t('conversations', 'Conversation') + " - ownCloud";
 		} else {
-			iconSrc += "conversations_red.png";
+			iconSrc += "conversations_red.svg";
 			document.title =  t('conversations', 'New comments') + " | " + t('conversations', 'Conversation') + " - " + OC.theme.title;
 		}
 		$('#navigation li[data-id="conversations_index"] img').attr ("src", iconSrc );		

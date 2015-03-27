@@ -4,7 +4,7 @@ OC.Conversations_App = {
 		$.post(OC.filePath('conversations', 'ajax', 'polling.php'), function(jsondata) {
 			if(jsondata.status == 'success' && jsondata.data.length != 0 ) {
 				// update conversations app-menu icon
-				var iconSrc = OC.appswebroots.conversations + "/img/conversations_red.png";
+				var iconSrc = OC.appswebroots.conversations + "/img/conversations_red.svg";
 				$('#navigation li[data-id="conversations_index"] img').attr ("src", iconSrc );
 
 				// add notif-icon in header bar for OC > 8
