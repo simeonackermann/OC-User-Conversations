@@ -38,16 +38,14 @@ if ( in_array($lang, OC_L10N::findAvailableLanguages('conversations')) && file_e
 	OCP\Util::addScript('conversations', 'jquery.timeago.' . $lang);
 }
 
-// rooms
-$rooms = OC_Conversations::getRooms();
-$updates = OC_Conversations::updateCheck();
-$rooms = array_merge_recursive($rooms, $updates);
-
 $tmpl = new OCP\Template( 'conversations', 'main', 'user' );
+$rooms = array_merge_recursive( OC_Conversations::getRooms(), OC_Conversations::updateCheck() );
+$tmpl->assign( 'rooms' , $rooms );
+$tmpl->assign( 'active_room' , OC_Conversations::getRoom());
 
-if ( ! empty($rooms) ) 
-	$tmpl->assign( 'rooms' , $rooms );
+$tmpl->assign( 'userCanDelete' , OCP\Config::getAppValue( 'conversations', 'userCanDelete', "yes" ) );
+$tmpl->assign( 'allowAttachment' , OCP\Config::getAppValue( 'conversations', 'allowAttachment', "yes" ) );
+$tmpl->assign( 'allowPrivateMsg' , OCP\Config::getAppValue( 'conversations', 'allowPrivateMsg', "yes" ) );
+$tmpl->assign( 'groupOnlyPrivateMsg' , OCP\Config::getAppValue( 'conversations', 'groupOnlyPrivateMsg', "no" ) );
 
-$room = OC_Conversations::getRoom();
-$tmpl->assign( 'active_room' , $room);
 $tmpl->printPage();

@@ -21,27 +21,6 @@
 * 
 */
 
-/*
-### CONFIG ###
------------------------------------------------------ */
-/* Allow that users can delete own posts, admin can delete all */
-define('USER_CONVERSATIONS_CAN_DELETE', true);
-
-/* Allow messages to a single user */
-define('UC_SINGLE_USER_MSG', true);
-
-/* Allow private messages only to users in the same groups
-	This is overwritten by the admin setting 'allow share with group members only'
-	*/
-define('UC_SINGLE_USER_MSG_GROUP_ONLY', false);
-
-/* FILE ATACHMENTS 
-This is a beta feature with some known bugs. It could changed in a future release without backward compatibility! */
-define('USER_CONVERSATIONS_ATTACHMENTS', true);
-
-/* end of configration ------------------------------ */
-
-
 // register model-file
 OC::$CLASSPATH['OC_Conversations'] = 'conversations/lib/conversations.php';
 
@@ -57,7 +36,6 @@ $l = OCP\Util::getL10N('conversations');
 OCP\App::addNavigationEntry( array( 
 	'id' => 'conversations_index',
 	'order' => 5,
-	//'href' => OCP\Util::linkTo( 'conversations', 'index.php' ),
 	'href' => OCP\Util::linkToRoute('conversations_index'),
 	'icon' => OCP\Util::imagePath( 'conversations', 'conversations.svg' ),
 	'name' => $l->t('Conversation'),

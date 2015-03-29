@@ -27,3 +27,6 @@ $this->create('conversations_ajax_polling', 'ajax/polling.php')
 
 $this->create('conversations_ajax_thumbnail', 'ajax/thumbnail.php')
 	->actionInclude('conversations/ajax/thumbnail.php');
+
+$this->create('conversations_ajax_settings', 'ajax/settings.php')
+	->actionInclude('conversations/ajax/settings.php');

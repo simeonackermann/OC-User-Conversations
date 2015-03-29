@@ -23,15 +23,16 @@
 
 class OC_Conversations
 {
-
+	
 							// TODO: better arguments! 
 	public static function getConversation($room=false, $offset=0, $limit=5, $from_id=null, $from_date=null)
 	{	
 		$userId = OC_User::getUser();			
 		$room = ( $room ) ? $room : self::getRoom();
-		$rtype = explode(":", $room);
+		$rtype = explode(":", $room);		
 
-		if ( $rtype[0] == "user" && UC_SINGLE_USER_MSG == true ) {			
+		//if ( $rtype[0] == "user" && UC_SINGLE_USER_MSG == true ) {			
+		if ( $rtype[0] == "user" ) {
 			// get user rooms: msgs to user X from me OR to me from user X
 			$and = array( "( ( room = ? AND author = ? ) OR ( room = ? AND author = ? ) )" );
 			$args = array($room, $userId, 'user:' . $userId, $rtype[1]);
@@ -71,7 +72,7 @@ class OC_Conversations
 		$room = self::getRoom();
 		$userId = OC_User::getUser();
 
-		if ( USER_CONVERSATIONS_ATTACHMENTS &&  OCP\Share::isEnabled() && ! empty($attachment) ) {
+		if ( OCP\Share::isEnabled() && ! empty($attachment) ) {
 			self::shareAttachment($attachment);
 		}
 
@@ -88,7 +89,7 @@ class OC_Conversations
 	}
 
 	public static function deleteComment( $id ) {
-		if ( ! USER_CONVERSATIONS_CAN_DELETE ) 
+		if ( OCP\Config::getAppValue( 'conversations', 'userCanDelete', "yes" ) == "no" ) 
 			return false;
 
 		$query = OCP\DB::prepare('SELECT author FROM *PREFIX*conversations WHERE id = ?');
@@ -117,13 +118,13 @@ class OC_Conversations
 		}
 
 		// add single users
-		if ( UC_SINGLE_USER_MSG == true ) {
+		if ( OCP\Config::getAppValue( 'conversations', 'allowPrivateMsg', "yes" ) == "yes" ) {
 			$groupMembersOnly = false;
 			if ( class_exists('OC\\Share\\Share') ) {
 				$groupMembersOnly = OC\Share\Share::shareWithGroupMembersOnly();
 			}
 
-			if ( $groupMembersOnly || UC_SINGLE_USER_MSG_GROUP_ONLY ) {  // add only users in same groups
+			if ( $groupMembersOnly || OCP\Config::getAppValue( 'conversations', 'groupOnlyPrivateMsg', "no" ) == "yes" ) {  // add only users in same groups
 				foreach (OC_Group::getUserGroups($userId) as $group) {
 					foreach (OC_Group::usersInGroup($group) as $user) {
 						if ( $userId != $user ) {

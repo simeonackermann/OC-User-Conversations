@@ -25,25 +25,40 @@ OCP\JSON::checkAppEnabled('conversations');
 OCP\JSON::checkLoggedIn();
 //OCP\JSON::callCheck();
 
-$room = isset( $_REQUEST['room'] ) ? $_REQUEST['room'] : false;
+$key = isset($_POST['key']) ? $_POST['key'] : false;
+$value = isset($_POST['value']) ? $_POST['value'] : "no";
 
-// TODO: remove room argument!
+if ( $key ) {
 
-if ( $room ) {
+	$success = true;
 
-	// store room as user default
-	OCP\Config::setUserValue(OC_User::getUser(), 'conversations', 'activeRoom', $room);
+	switch ( $key ) {
+		case 'user_can_delete':
+			setConfig( 'userCanDelete', $value );
+			break;
 
-	$count = 5;
-	$page = isset($_REQUEST['page']) ? $_REQUEST['page'] : 0;
+		case 'allow_attachment':
+			setConfig( 'allowAttachment', $value );
+			break;
 
-	$from_id = isset($_REQUEST['from_id']) ? intval($_REQUEST['from_id']) : null;
+		case 'allow_single_msg':
+			setConfig( 'allowPrivateMsg', $value );
+			break;
 
-	// load room
-    $tmpl = new OCP\Template( 'conversations' , 'part.conversation' );
-    $tmpl->assign( 'conversation' , OC_Conversations::getConversation(false, $page * $count, $count, $from_id) );
-    $tmpl->assign( 'userCanDelete' , OCP\Config::getAppValue( 'conversations', 'userCanDelete', "yes" ) );
+		case 'group_only_private_msg':
+			setConfig( 'groupOnlyPrivateMsg', $value );
+			break;
+		
+		default:
+			$success = false;
+			break;
+	}
 
-    $conversation = $tmpl->fetchPage();
-	OCP\JSON::success(array('data' => array( 'conversation' => $conversation  )));
+	if ( $success ) {
+		OCP\JSON::success(array());
+	}	
+}
+
+function setConfig( $key, $value ) {	
+	OCP\Config::setAppValue( 'conversations', $key, $value );
 }

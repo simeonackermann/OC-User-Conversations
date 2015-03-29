@@ -202,3 +202,9 @@
     margin: 40px;
     color: #555;
 }
+#app-settings-content p {
+	padding-left: 18px;
+}
+#app-settings-content input {
+	margin-left: -18px;
+}

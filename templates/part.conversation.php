@@ -16,7 +16,7 @@
 			</div>
 			<?php 
 			$uid = OC_User::getUser();
-			if( USER_CONVERSATIONS_CAN_DELETE && ( OC_User::isAdminUser($uid) || $author == $uid ) ): ?>
+			if( $_['userCanDelete'] == "yes" && ( OC_User::isAdminUser($uid) || $author == $uid ) ): ?>
 				<div class="delete"><a href="#" class="action delete delete-icon icon-delete"></a></div>
 			<?php endif; ?>
 		</div>

@@ -295,5 +295,17 @@ $(document).ready(function(){
 	    OC.Conversations.windowFocus = false;
 	});
 
+	// app settings
+	$('#app-settings-content input').change(function () {
+		$.post(OC.filePath('conversations', 'ajax', 'settings.php'), {
+            key : $(this).attr("id"),
+            value : this.checked ? "yes" : "no"
+        }, function(jsondata) {
+            if(jsondata.status == 'success') {
+            	window.location.reload();
+            } 
+        }, 'json');
+	});
+
 });
 
