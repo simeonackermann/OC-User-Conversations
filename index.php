@@ -43,9 +43,9 @@ $rooms = array_merge_recursive( OC_Conversations::getRooms(), OC_Conversations::
 $tmpl->assign( 'rooms' , $rooms );
 $tmpl->assign( 'active_room' , OC_Conversations::getRoom());
 
-$tmpl->assign( 'userCanDelete' , OCP\Config::getAppValue( 'conversations', 'userCanDelete', "yes" ) );
-$tmpl->assign( 'allowAttachment' , OCP\Config::getAppValue( 'conversations', 'allowAttachment', "yes" ) );
-$tmpl->assign( 'allowPrivateMsg' , OCP\Config::getAppValue( 'conversations', 'allowPrivateMsg', "yes" ) );
-$tmpl->assign( 'groupOnlyPrivateMsg' , OCP\Config::getAppValue( 'conversations', 'groupOnlyPrivateMsg', "no" ) );
+$tmpl->assign( 'userCanDelete', OC_Conversations::$userCanDelete );
+$tmpl->assign( 'allowAttachment' , OC_Conversations::$allowAttachment );
+$tmpl->assign( 'allowPrivateMsg' , OC_Conversations::$allowPrivateMsg );
+$tmpl->assign( 'groupOnlyPrivateMsg' , OC_Conversations::$groupOnlyPrivateMsg );
 
 $tmpl->printPage();

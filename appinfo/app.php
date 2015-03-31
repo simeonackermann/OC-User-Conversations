@@ -24,6 +24,12 @@
 // register model-file
 OC::$CLASSPATH['OC_Conversations'] = 'conversations/lib/conversations.php';
 
+// set default config setttings
+OC_Conversations::$userCanDelete = OCP\Config::getAppValue( 'conversations', 'userCanDelete', "no" );
+OC_Conversations::$allowAttachment = OCP\Config::getAppValue( 'conversations', 'allowAttachment', "yes" );
+OC_Conversations::$allowPrivateMsg = OCP\Config::getAppValue( 'conversations', 'allowPrivateMsg', "yes" );
+OC_Conversations::$groupOnlyPrivateMsg = OCP\Config::getAppValue( 'conversations', 'groupOnlyPrivateMsg', "no" );
+
 // add update script to change the app-icon even when app is not active, TODO: find app-not-active function...!
 OCP\Util::addscript('conversations','updateCheck');
 
@@ -31,8 +37,7 @@ OCP\Util::addscript('conversations','updateCheck');
 OC_HOOK::connect('OC_User', 'post_addToGroup', 'OC_Conversations', 'changeUserGroup');
 OC_HOOK::connect('OC_User', 'post_removeFromGroup', 'OC_Conversations', 'changeUserGroup');
 
-//$l=OC_L10N::get('conversations');
-$l = OCP\Util::getL10N('conversations');
+$l = OC_L10N::get('conversations');
 OCP\App::addNavigationEntry( array( 
 	'id' => 'conversations_index',
 	'order' => 5,

@@ -23,13 +23,17 @@
 
 class OC_Conversations
 {
+	public static $userCanDelete;
+	public static $allowAttachment;
+	public static $allowPrivateMsg;
+	public static $groupOnlyPrivateMsg;
 	
 							// TODO: better arguments! 
 	public static function getConversation($room=false, $offset=0, $limit=5, $from_id=null, $from_date=null)
 	{	
 		$userId = OC_User::getUser();			
 		$room = ( $room ) ? $room : self::getRoom();
-		$rtype = explode(":", $room);		
+		$rtype = explode(":", $room);			
 
 		//if ( $rtype[0] == "user" && UC_SINGLE_USER_MSG == true ) {			
 		if ( $rtype[0] == "user" ) {
@@ -89,7 +93,7 @@ class OC_Conversations
 	}
 
 	public static function deleteComment( $id ) {
-		if ( OCP\Config::getAppValue( 'conversations', 'userCanDelete', "yes" ) == "no" ) 
+		if ( self::$userCanDelete == "no" ) 
 			return false;
 
 		$query = OCP\DB::prepare('SELECT author FROM *PREFIX*conversations WHERE id = ?');
@@ -118,13 +122,13 @@ class OC_Conversations
 		}
 
 		// add single users
-		if ( OCP\Config::getAppValue( 'conversations', 'allowPrivateMsg', "yes" ) == "yes" ) {
+		if ( self::$allowPrivateMsg == "yes" ) {
 			$groupMembersOnly = false;
 			if ( class_exists('OC\\Share\\Share') ) {
 				$groupMembersOnly = OC\Share\Share::shareWithGroupMembersOnly();
 			}
 
-			if ( $groupMembersOnly || OCP\Config::getAppValue( 'conversations', 'groupOnlyPrivateMsg', "no" ) == "yes" ) {  // add only users in same groups
+			if ( $groupMembersOnly || self::$groupOnlyPrivateMsg == "yes" ) {  // add only users in same groups
 				foreach (OC_Group::getUserGroups($userId) as $group) {
 					foreach (OC_Group::usersInGroup($group) as $user) {
 						if ( $userId != $user ) {

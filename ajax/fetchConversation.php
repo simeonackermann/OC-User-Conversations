@@ -42,7 +42,7 @@ if ( $room ) {
 	// load room
     $tmpl = new OCP\Template( 'conversations' , 'part.conversation' );
     $tmpl->assign( 'conversation' , OC_Conversations::getConversation(false, $page * $count, $count, $from_id) );
-    $tmpl->assign( 'userCanDelete' , OCP\Config::getAppValue( 'conversations', 'userCanDelete', "yes" ) );
+    $tmpl->assign( 'userCanDelete' , OC_Conversations::$userCanDelete );
 
     $conversation = $tmpl->fetchPage();
 	OCP\JSON::success(array('data' => array( 'conversation' => $conversation  )));
