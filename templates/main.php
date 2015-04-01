@@ -106,6 +106,7 @@
 				<a href="#" title="<?php p($l->t("Add file")); ?>" id="add-attachment"><img class="svg" alt="" src="<?php p(OC::$WEBROOT . '/core/img/places/folder.svg'); ?>" /></a>
 			<?php } ?>
 			<input type="submit" class="button" value="<?php p($l->t("Submit")); ?>" disabled="disabled" tabindex="2" title="(CTRL+Enter)" />
+			<img src="<?php echo OCP\Util::imagePath( 'conversations', 'loading-small.gif' )?>" id="new-comment-loader" style="display:none" />
 			<br clear="both" />
 		</div>
 	</form>

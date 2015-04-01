@@ -52,8 +52,7 @@ OC.Conversations = {
             		// load complete room, MAY OBSOLTE
                 	$("#conversation").html(jsondata.data.conversation);
                 } 
-				if ( $("#new-comment-loader").length > 0 ) 
-					$("#new-comment-loader").remove(); 
+				$("#new-comment-loader").hide();
 				if ( highlight ) 
 					$(".comment:first-child").effect("bounce", {}, 400);
 
@@ -270,14 +269,12 @@ $(document).ready(function(){
 		var attachment = $("#new-comment-attachment").attr("data-attachment");		
 
 		if ( comment != "" || ( attachment != undefined && attachment != "" ) ) {
-			$("#new-comment input[type=submit]").after('<img src="'+OC.filePath('core', 'img', 'loading-small.gif')+'" id="new-comment-loader" />');
-
+			$("#new-comment-loader").show();
 			OC.Conversations.NewComment(comment, attachment);
 			
 			$("#new-comment-text").val("");
 			$("#new-comment-text").height("55px");
 			OC.Conversations.RemoveAttachmentPreview();
-			
 		}
 		event.preventDefault();
 	});
