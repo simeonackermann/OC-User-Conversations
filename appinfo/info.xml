@@ -6,5 +6,9 @@
 	<version>0.2.1</version>
 	<licence>AGPL</licence>
 	<author>Simeon Ackermann</author>
-	<require>6.0</require>
+	<namespace>UserConversations</namespace>
+	<category>tools</category>
+	<dependencies>
+		<owncloud min-version="6" />
+	</dependencies>
 </info>
