@@ -37,6 +37,8 @@ OCP\Util::addscript('conversations','globalPolling');
 // register HOOKs
 OC_HOOK::connect('OC_User', 'post_addToGroup', 'OC_Conversations', 'changeUserGroup');
 OC_HOOK::connect('OC_User', 'post_removeFromGroup', 'OC_Conversations', 'changeUserGroup');
+OC_HOOK::connect('OC_User', 'post_login', 'OC_Conversations', 'hook_login');
+OC_HOOK::connect('OC_User', 'logout', 'OC_Conversations', 'hook_logout');
 
 $l = OC_L10N::get('conversations');
 OCP\App::addNavigationEntry( array( 

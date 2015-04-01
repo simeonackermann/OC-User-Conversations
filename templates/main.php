@@ -21,10 +21,10 @@
 						<li class='user-label'><label><?php p($l->t("User")); ?></label></li>
 					<?php }
 				} ?>
-				<li class="<?php p($room['type']); ?> <?php if ($rid == $_['active_room']) p('active'); ?> <?php if ( isset($room['newmsgs']) ) p('new-msg'); ?>"
+				<li class="<?php p($room['type']); ?> <?php if ($rid == $_['active_room']) p('active'); ?> <?php if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
 					data-type="<?php p($room['type']); ?>" data-room="<?php p($rid); ?>">
 					<a class="" role="button">
-						<?php if ( !empty($avatar) ) { ?><img src="<?php p($avatar); ?>" /><?php }
+						<?php if ( !empty($avatar) ) { ?><img src="<?php p($avatar); ?>" class="avatar" /><?php }
 						p($room_name); ?>
 						<span>
 							<?php if ( isset($room['newmsgs']) && $rid != $_['active_room']) {
@@ -32,6 +32,7 @@
 								$newMsgCounter = $newMsgCounter + $room['newmsgs'];
 							} ?>
 						</span>
+						<img src="<?php echo OCP\Util::imagePath( 'conversations', 'online.svg' )?>" class="online" title="<?php p($l->t("online")); ?>" style="<?php if ( ! isset($room['online']) ) p('display:none'); ?>" />
 					</a>
 				</li>
 			<?php endforeach; ?>

@@ -27,4 +27,6 @@ OCP\JSON::checkLoggedIn();
 
 $update = OC_Conversations::updateCheck();
 
+OC_Conversations::updateUserOnlineStatus( OC_User::getUser() );
+
 OCP\JSON::success(array('data' => $update ));

@@ -121,38 +121,49 @@ OC.Conversations = {
 		$.post(OC.filePath('conversations', 'ajax', 'polling.php'), {
         }, function(jsondata) {
             if(jsondata.status == 'success') {
+            	var hasNewMsgs = false;
             	var allNewMsgs = 0;
             	var playNotif = false;
             	var playNotifEl = $("#conversations-sound-notif").get(0);
             	for ( var rkey in jsondata.data) {
-            		if ( rkey ==  $("#new-comment").attr("data-room") ) {
-            			// TODO BUG: dont poll if user submitted a new post until its completed
-            			// new msgs in current room
-            			var last_id = $(".comment:first-child").attr("data-id");
-            			playNotif = true;
-            			OC.Conversations.LoadConversation( last_id, true );
+            		// test if room has a new msg
+            		if ( jsondata.data[rkey].hasOwnProperty("newmsgs") ) {
+            			hasNewMsgs = true;
+            			if ( rkey ==  $("#new-comment").attr("data-room") ) {
+	            			// TODO BUG: dont poll if user submitted a new post until its completed
+	            			// new msgs in current room
+	            			var last_id = $(".comment:first-child").attr("data-id");
+	            			playNotif = true;
+	            			OC.Conversations.LoadConversation( last_id, true );
+	            		} else {
+	            			// new msgs in other room
+	            			var newmsgs = jsondata.data[rkey].newmsgs;
+	            			var rkeyclass = rkey.replace(/:/g, "-");
+
+	            			var oldNewMsg = $("li[data-room='" + rkey + "'] span").text().replace(/\(|\)/g, '');
+	            			oldNewMsg = parseInt(oldNewMsg);
+	            			if ( newmsgs > oldNewMsg ) {
+	            				playNotif = true;
+	            			}
+
+	            			$("li[data-room='" + rkey + "']").addClass('new-msg');
+	            			$("li[data-room='" + rkey + "'] span").text( "(" + newmsgs + ")");
+	            			allNewMsgs = allNewMsgs+newmsgs;
+	            		}
+            		}   
+            		// may add online status
+            		if ( jsondata.data[rkey].hasOwnProperty("online") ) {
+            			$("li[data-room='" + rkey + "'] img.online").css("display","inline-block");
             		} else {
-            			// new msgs in other room
-            			var newmsgs = jsondata.data[rkey].newmsgs;
-            			var rkeyclass = rkey.replace(/:/g, "-");
-
-            			var oldNewMsg = $("li[data-room='" + rkey + "'] span").text().replace(/\(|\)/g, '');
-            			oldNewMsg = parseInt(oldNewMsg);
-            			if ( newmsgs > oldNewMsg ) {
-            				playNotif = true;
-            			}
-
-            			$("li[data-room='" + rkey + "']").addClass('new-msg');
-            			$("li[data-room='" + rkey + "'] span").text( "(" + newmsgs + ")");
-            			allNewMsgs = allNewMsgs+newmsgs;
+            			$("li[data-room='" + rkey + "'] img.online").css("display","none");
             		}
-            	}
+            	}            	
             	$("#uc-new-msg-counter").val( allNewMsgs );
             	if ( playNotif == true ) {
             		playNotifEl.play();
             	}
             	// set document title if window doesnt has focus or new msg in other rooms
-            	if ( jsondata.data.length != 0 ) {
+            	if ( hasNewMsgs ) {
             		if ( ! OC.Conversations.windowFocus ) {
 	            		OC.Conversations.SetNavigationIcon( 'highlight' );
 	            	}
@@ -161,6 +172,9 @@ OC.Conversations = {
 	            	}
             	} else {
             		OC.Conversations.SetNavigationIcon();
+            	}
+            	if ( jsondata.data.length == 0 ) {
+            		$("li[data-room] img.online").css("display","none");
             	}
             }
         }, 'json');
@@ -248,7 +262,7 @@ $(document).ready(function(){
 				OC.Conversations.SetNavigationIcon();
 			}
 		}
-	});	
+	});
 
 	// submit new commnt
 	$("#new-comment").submit(function(event) {

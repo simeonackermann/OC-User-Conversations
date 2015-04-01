@@ -34,7 +34,7 @@
 	font-weight: bold;
 	color: #555;
 }
-#rooms img {
+#rooms img.avatar {
 	margin: 5px 3px 0 0;
 	float: left;
 }
@@ -47,6 +47,11 @@
 	font-weight: bold;
 	font-style: italic;
 	display: block;
+}
+#rooms img.online {
+	position: absolute;
+	margin-top: 14px;
+	right: 7px;
 }
 
 #new-comment {	

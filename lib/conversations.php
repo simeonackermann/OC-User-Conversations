@@ -143,6 +143,15 @@ class OC_Conversations
 					}
 				}
 			}
+			// add onlinestatus as online if user is logged in and last update is not older than 31 seconds (2 polling periods)
+			foreach ($urooms as $key => $value) {
+				$uid = substr($key, strpos($key, ":")+1 );
+				$conf = OCP\Config::getUserValue( $uid, 'conversations', 'conf', false );
+				$conf = ( ! $conf ) ? array() : unserialize( $conf );
+				if ( isset($conf["onlinestatus"]) && $conf["onlinestatus"] == "online" && ( time() - $conf["lastupdate"] ) <= 31  ) {
+					$urooms["user:".$uid]["online"] = true;
+				}
+			}
 		}
 		$rooms = $grooms + $urooms; 
 		return $rooms;
@@ -169,7 +178,7 @@ class OC_Conversations
 		$conf = ( ! $conf ) ? array() : unserialize( $conf );
 		$conf['rooms'][$room]['rtime'] = time();
 
-		OCP\Config::setUserValue( $userId, 'conversations', 'conf', serialize($conf));				
+		OCP\Config::setUserValue( $userId, 'conversations', 'conf', serialize($conf));
 	}
 
 	
@@ -218,6 +227,7 @@ class OC_Conversations
 
 		foreach (self::getRooms() as $rkey => $room) {
 			//$rtype = explode(":", $room);
+			$onlinestatus = false;
 			if ( $room['type'] == "group" ) {
 				$conf = OCP\Config::getAppValue( 'conversations', 'conf', false );
 				$conf = ( ! $conf ) ? array() : unserialize( $conf );
@@ -226,7 +236,7 @@ class OC_Conversations
 			} else {
 				$u2conf = OCP\Config::getUserValue( $room['name'], 'conversations', 'conf', false );
 				$u2conf = ( ! $u2conf ) ? array() : unserialize( $u2conf );
-				$wtime = @$u2conf['rooms']['user:'.$userId]['wtime']; // @ if user didnt logged in yet -> key rooms not exist				
+				$wtime = @$u2conf['rooms']['user:'.$userId]['wtime']; // @ if user didnt logged in yet -> key rooms not exist								
 			}
 			$urtime = @$uconf['rooms'][$rkey]['rtime'];
 
@@ -235,6 +245,11 @@ class OC_Conversations
 				// get newer comments than last user room read time
 				$new_comments = self::getConversation( $rkey, null, null, null, date( 'Y-m-d H:i:s', $urtime) );
 				$result[$rkey] = array( 'newmsgs' => count($new_comments) );
+			}
+
+			// write onlinestatus
+			if ( isset($room['online']) ) {
+					$result[$rkey]["online"] = true;
 			}
 		}
         return $result;
@@ -413,5 +428,23 @@ class OC_Conversations
 	public static function changeUserGroup( $args ) {
 		$query = OCP\DB::prepare('DELETE FROM *PREFIX*preferences WHERE userid = ? AND appid = "conversations" AND configkey = "activeRoom"');
 		$query->execute( array( $args['uid'] ));
+	}
+
+	public static function hook_login($uid) {
+		self::updateUserOnlineStatus( $uid['uid'] );
+	}
+
+	public static function hook_logout() {
+		$uid = OC_User::getUser();
+		self::updateUserOnlineStatus( $uid, "offline" );
+	}
+
+	public static function updateUserOnlineStatus($uid, $value="online") {
+		$conf = OCP\Config::getUserValue( $uid, 'conversations', 'conf', false );
+		$conf = ( ! $conf ) ? array() : unserialize( $conf );
+		$conf["onlinestatus"] = $value;
+		$conf["lastupdate"] = time();
+
+		OCP\Config::setUserValue( $uid, 'conversations', 'conf', serialize($conf));
 	}
 }
