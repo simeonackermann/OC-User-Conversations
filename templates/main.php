@@ -31,21 +31,23 @@
 		?>
 
 		<ul id="rooms">
-			<li class='user-label'><label><?php p($l->t("Groups")); ?></label></li>
-			<?php foreach($sortedRooms['groups'] as $room) { ?>
-				<li class="group <?php if ($room['rid'] == $_['active_room']) p('active'); if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
-					data-type="group" data-room="<?php p($room['rid']); ?>">
-				<a class="" role="button">
-					<?php p($room['name']); ?>
-					<span>
-						<?php if ( isset($room['newmsgs']) && $room['rid'] != $_['active_room']) {
-							p("(" . $room['newmsgs'] . ")"); 
-							$newMsgCounter = $newMsgCounter + $room['newmsgs'];
-						} ?>
-					</span>
-				</a>
-			</li>
-			<?php } ?> 
+			<?php if ( count($sortedRooms['groups'])>0 ) { ?>
+				<li class='user-label'><label><?php p($l->t("Groups")); ?></label></li>
+				<?php foreach($sortedRooms['groups'] as $room) { ?>
+					<li class="group <?php if ($room['rid'] == $_['active_room']) p('active'); if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
+						data-type="group" data-room="<?php p($room['rid']); ?>">
+					<a class="" role="button">
+						<?php p($room['name']); ?>
+						<span>
+							<?php if ( isset($room['newmsgs']) && $room['rid'] != $_['active_room']) {
+								p("(" . $room['newmsgs'] . ")"); 
+								$newMsgCounter = $newMsgCounter + $room['newmsgs'];
+							} ?>
+						</span>
+					</a>
+				</li>
+				<?php } ?> 
+			<?php } ?>
 
 			<li class='user-label'><label><?php p($l->t("User")); ?></label></li>
 			<?php foreach($sortedRooms['user'] as $room) {
