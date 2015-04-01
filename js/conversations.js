@@ -282,6 +282,13 @@ $(document).ready(function(){
 		event.preventDefault();
 	});
 
+	// submit commit with ctrl+enter
+	$(document).bind('keypress', function(event) {
+		if( event.which === 13 && event.ctrlKey ) {
+			$("#new-comment").submit();
+		}
+	});
+
 	// add attachment
 	$('#add-attachment').click(function(){
 		OC.dialogs.filepicker(t('conversations', 'Select file'),OC.Conversations.AddAttachment, false, [], true);
@@ -293,7 +300,6 @@ $(document).ready(function(){
 		OC.Conversations.DeleteComment(id);
 		return false;
 	});
-
 
 	// first fill app-content
 	OC.Conversations.prefill();
