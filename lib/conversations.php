@@ -23,10 +23,14 @@
 
 class OC_Conversations
 {
+	// app config var
 	public static $userCanDelete;
 	public static $allowAttachment;
 	public static $allowPrivateMsg;
 	public static $groupOnlyPrivateMsg;
+
+	// class vars
+	public static $rooms;
 	
 							// TODO: better arguments! 
 	public static function getConversation($room=false, $offset=0, $limit=5, $from_id=null, $from_date=null)
@@ -114,6 +118,9 @@ class OC_Conversations
 		$urooms = array();
 		$userId = OC_User::getUser();
 		$ordering = array();
+		if ( self::$rooms != NULL ) {
+			return self::$rooms;
+		}
 		// add groups the user contains if more than the user himself is in the room
 		foreach (OC_Group::getUserGroups($userId) as $group) {
 			if ( count(OC_Group::usersInGroup($group)) > 1 ) {
@@ -172,6 +179,7 @@ class OC_Conversations
 			}
 		}
 		$rooms = $grooms + $urooms; 
+		self::$rooms = $rooms;
 		return $rooms;
 	}	
 
