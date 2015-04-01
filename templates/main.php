@@ -1,33 +1,64 @@
 <div id="app-navigation">
 <?php if ( ! empty($_['rooms']) ) : ?>
 	<?php if ( $_['allowPrivateMsg'] == "yes" || count($_['rooms']) > 1 ) : ?>
-		<?php
-		$showGroups = true;
-		$showUsers = true;
+		<?php		
 		$newMsgCounter = 0;
+
+		function sortRooms( $rooms ) {
+			$groups = array();
+			$users = array();
+			foreach($rooms as $rid => $room) {
+				$room['rid'] = $rid;
+				if ( $room['type'] == "group" ) {
+					$groups[] = $room;
+				} else {
+					$users[] = $room;
+				}
+			}
+
+			uasort($groups, function( $a, $b) {
+				return ($a['lastwrite'] >= $b['lastwrite']) ? -1 : 1;
+			} );
+
+			uasort($users, function( $a, $b) {
+				return ($a['lastwrite'] >= $b['lastwrite']) ? -1 : 1;
+			} );
+
+			return array( 'groups' => $groups, 'user' => $users );
+
+		}
+		$sortedRooms = sortRooms( $_['rooms'] );
 		?>
+
 		<ul id="rooms">
-			<?php foreach($_['rooms'] as $rid => $room) :
-				$room_name = $room['name'];
-				if ( $room['type'] == "group" && $showGroups ) {
-					$showGroups = false; ?>
-					<li class='user-label'><label><?php p($l->t("Groups")); ?></label></li>
-				<?php }
-				if ( $room['type'] == "user" ) {
-					$room_name = OC_User::getDisplayName( $room['name'] );
-					$avatar = OC_Conversations::getUserAvatar( $room['name'] );
-					if ( $showUsers ) {
-						$showUsers = false; ?>
-						<li class='user-label'><label><?php p($l->t("User")); ?></label></li>
-					<?php }
-				} ?>
-				<li class="<?php p($room['type']); ?> <?php if ($rid == $_['active_room']) p('active'); ?> <?php if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
-					data-type="<?php p($room['type']); ?>" data-room="<?php p($rid); ?>">
+			<li class='user-label'><label><?php p($l->t("Groups")); ?></label></li>
+			<?php foreach($sortedRooms['groups'] as $room) { ?>
+				<li class="group <?php if ($room['rid'] == $_['active_room']) p('active'); if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
+					data-type="group" data-room="<?php p($room['rid']); ?>">
+				<a class="" role="button">
+					<?php p($room['name']); ?>
+					<span>
+						<?php if ( isset($room['newmsgs']) && $room['rid'] != $_['active_room']) {
+							p("(" . $room['newmsgs'] . ")"); 
+							$newMsgCounter = $newMsgCounter + $room['newmsgs'];
+						} ?>
+					</span>
+				</a>
+			</li>
+			<?php } ?> 
+
+			<li class='user-label'><label><?php p($l->t("User")); ?></label></li>
+			<?php foreach($sortedRooms['user'] as $room) {
+				$displayName = OC_User::getDisplayName( $room['name'] );
+				$avatar = OC_Conversations::getUserAvatar( $room['name'] );
+				?>
+				<li class="user <?php if ($room['rid'] == $_['active_room']) p('active'); if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
+					data-type="user" data-room="<?php p($room['rid']); ?>">
 					<a class="" role="button">
 						<?php if ( !empty($avatar) ) { ?><img src="<?php p($avatar); ?>" class="avatar" /><?php }
-						p($room_name); ?>
+						p($displayName); ?>
 						<span>
-							<?php if ( isset($room['newmsgs']) && $rid != $_['active_room']) {
+							<?php if ( isset($room['newmsgs']) && $room['rid'] != $_['active_room']) {
 								p("(" . $room['newmsgs'] . ")"); 
 								$newMsgCounter = $newMsgCounter + $room['newmsgs'];
 							} ?>
@@ -35,7 +66,7 @@
 						<img src="<?php echo OCP\Util::imagePath( 'conversations', 'online.svg' )?>" class="online" title="<?php p($l->t("online")); ?>" style="<?php if ( ! isset($room['online']) ) p('display:none'); ?>" />
 					</a>
 				</li>
-			<?php endforeach; ?>
+			<?php } ?> 			
 		</ul>
 		<input type="hidden" id="uc-new-msg-counter" value="<?php echo $newMsgCounter; ?>" />
 	<?php endif; ?>
