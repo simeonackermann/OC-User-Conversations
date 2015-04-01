@@ -31,9 +31,10 @@ OC_Conversations::$allowPrivateMsg = OCP\Config::getAppValue( 'conversations', '
 OC_Conversations::$groupOnlyPrivateMsg = OCP\Config::getAppValue( 'conversations', 'groupOnlyPrivateMsg', "no" );
 
 // add update script to change the app-icon even when app is not active, TODO: find app-not-active function...!
-OCP\Util::addscript('conversations','updateCheck');
+// OC::$server->getNavigationManager()->getActiveEntry() != "conversations_index"	
+OCP\Util::addscript('conversations','globalPolling');
 
-// register HOOK change user group
+// register HOOKs
 OC_HOOK::connect('OC_User', 'post_addToGroup', 'OC_Conversations', 'changeUserGroup');
 OC_HOOK::connect('OC_User', 'post_removeFromGroup', 'OC_Conversations', 'changeUserGroup');
 
