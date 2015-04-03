@@ -146,7 +146,7 @@ OC.Conversations = {
 	            			}
 
 	            			$("li[data-room='" + rkey + "']").addClass('new-msg');
-	            			$("li[data-room='" + rkey + "'] span").text( "(" + newmsgs + ")");
+	            			$("li[data-room='" + rkey + "'] span.new-msg-counter-room").text( "(" + newmsgs + ")");
 	            			allNewMsgs = allNewMsgs+newmsgs;
 	            		}
             		}   
@@ -229,8 +229,8 @@ $(document).ready(function(){
 		var room = $(this).attr("data-room");
 
 		$("#rooms li").removeClass('active');
-		var thisNewMsg = $(this).children().children("span").text();
-		$(this).children().children("span").text("");
+		var thisNewMsg = $(this).children().children("span.new-msg-counter-room").text();
+		$(this).children().children("span.new-msg-counter-room").text("");
 		$(this).removeClass('new-msg');
 		$(this).addClass('active');
 

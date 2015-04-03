@@ -4,7 +4,7 @@
 		<?php		
 		$newMsgCounter = 0;
 
-		function sortRooms( $rooms ) {
+		function prepNavRooms( $rooms ) {
 			$groups = array();
 			$users = array();
 			foreach($rooms as $rid => $room) {
@@ -27,39 +27,44 @@
 			return array( 'groups' => $groups, 'user' => $users );
 
 		}
-		$sortedRooms = sortRooms( $_['rooms'] );
+		$navRooms = prepNavRooms( $_['rooms'] );
 		?>
 
 		<ul id="rooms">
-			<?php if ( count($sortedRooms['groups'])>0 ) { ?>
+			<?php if ( count($navRooms['groups'])>0 ) { ?>
 				<li class='user-label'><label><?php p($l->t("Groups")); ?></label></li>
-				<?php foreach($sortedRooms['groups'] as $room) { ?>
+				<?php foreach($navRooms['groups'] as $room) { 
+					$usersInGroup = array();
+					foreach ( OC_Group::usersInGroup($room['name']) as $userInGroup) {
+					 	$usersInGroup[] =  OC_User::getDisplayName( $userInGroup );
+					 } ?>				
 					<li class="group <?php if ($room['rid'] == $_['active_room']) p('active'); if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
 						data-type="group" data-room="<?php p($room['rid']); ?>">
 					<a class="" role="button">
 						<?php p($room['name']); ?>
-						<span>
+						<span class="new-msg-counter-room">
 							<?php if ( isset($room['newmsgs']) && $room['rid'] != $_['active_room']) {
 								p("(" . $room['newmsgs'] . ")"); 
 								$newMsgCounter = $newMsgCounter + $room['newmsgs'];
 							} ?>
 						</span>
+						<span class="group-room-users">
+						<?php p( '- ' . implode(", ", $usersInGroup) ); ?>
+						<span class="group-room-users">
 					</a>
 				</li>
 				<?php } ?> 
 			<?php } ?>
 
 			<li class='user-label'><label><?php p($l->t("User")); ?></label></li>
-			<?php foreach($sortedRooms['user'] as $room) {
-				$displayName = OC_User::getDisplayName( $room['name'] );
-				$avatar = OC_Conversations::getUserAvatar( $room['name'] );
-				?>
+			<?php foreach($navRooms['user'] as $room) {
+				$avatar = OC_Conversations::getUserAvatar( $room['name'] ); ?>
 				<li class="user <?php if ($room['rid'] == $_['active_room']) p('active'); if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
 					data-type="user" data-room="<?php p($room['rid']); ?>">
 					<a class="" role="button">
 						<?php if ( !empty($avatar) ) { ?><img src="<?php p($avatar); ?>" class="avatar" /><?php }
-						p($displayName); ?>
-						<span>
+						p( OC_User::getDisplayName( $room['name'] ) ); ?>
+						<span class="new-msg-counter-room">
 							<?php if ( isset($room['newmsgs']) && $room['rid'] != $_['active_room']) {
 								p("(" . $room['newmsgs'] . ")"); 
 								$newMsgCounter = $newMsgCounter + $room['newmsgs'];
