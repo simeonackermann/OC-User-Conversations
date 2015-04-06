@@ -39,7 +39,7 @@ if ( in_array($lang, OC_L10N::findAvailableLanguages('conversations')) && file_e
 }
 
 $tmpl = new OCP\Template( 'conversations', 'main', 'user' );
-$rooms = array_merge_recursive( OC_Conversations::getRooms(), OC_Conversations::updateCheck() );
+$rooms = array_replace_recursive( OC_Conversations::getRooms(), OC_Conversations::updateCheck() );
 $tmpl->assign( 'rooms' , $rooms );
 $tmpl->assign( 'active_room' , OC_Conversations::getRoom());
 
