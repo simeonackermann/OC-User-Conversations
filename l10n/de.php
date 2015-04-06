@@ -12,4 +12,6 @@
 "Loading older comments" => "Lade ältere Kommentare",
 "No more comments to load" => "Keine weiteren Kommentare verfügbar",
 "No comments to load" => "Keine Kommentare verfügbar",
+"No comments" => "Keine Kommentare",
+"Last comment" => "Letzter Kommentar"
 );
