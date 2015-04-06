@@ -124,14 +124,8 @@ class OC_Conversations
 		// add groups the user contains if more than the user himself is in the room
 		foreach (OC_Group::getUserGroups($userId) as $group) {
 			if ( count(OC_Group::usersInGroup($group)) > 1 ) {
-				$lastwrite = OCP\Config::getAppValue( 'conversations', 'conf', false );
-				$lastwrite = ( ! $lastwrite ) ? array() : unserialize( $lastwrite );
-				if ( isset($lastwrite['rooms']['group:'.$group]) && isset($lastwrite['rooms']['group:'.$group]['wtime']) ) {
-					$lastwrite = $lastwrite['rooms']['group:'.$group]['wtime'];
-				} else {
-					$lastwrite = 0;
-				}
-				$grooms["group:".$group] = array( "type" => "group", "name" => $group, "lastwrite" => $lastwrite );
+				$grooms["group:".$group] = array( "type" => "group", "name" => $group );
+				$grooms["group:".$group]["lastwrite"] = self::getLastWriteTime( $grooms["group:".$group] );
 			}
 		}
 
@@ -159,23 +153,14 @@ class OC_Conversations
 			}
 			// add lastwrite time and add onlinestatus as online if user is logged in and last update is not older than 31 seconds (2 polling periods)
 			foreach ($urooms as $key => $value) {
-				$uid = substr($key, strpos($key, ":")+1 );
-				$conf = OCP\Config::getUserValue( $uid, 'conversations', 'conf', false );
+				$roomName = $value["name"];
+
+				$conf = OCP\Config::getUserValue( $roomName, 'conversations', 'conf', false );
 				$conf = ( ! $conf ) ? array() : unserialize( $conf );
 				if ( isset($conf["onlinestatus"]) && $conf["onlinestatus"] == "online" && ( time() - $conf["lastupdate"] ) <= 31  ) {
-					$urooms["user:".$uid]["online"] = true;
+					$urooms["user:".$roomName]["online"] = true;
 				}
-				// add lastwrite of a room (from me or the other persons config value)
-				$myConf = OCP\Config::getUserValue( $userId, 'conversations', 'conf', false );
-				$myConf = ( ! $conf ) ? array() : unserialize( $myConf );
-				$lastwrite = 0;
-				if ( isset($conf['rooms']['user:'.$userId]['wtime']) ) {
-					$lastwrite = $conf['rooms']['user:'.$userId]['wtime'];
-				}
-				if ( isset($myConf['rooms'][$key]['wtime']) && $myConf['rooms'][$key]['wtime'] > $lastwrite ) {
-					$lastwrite = $myConf['rooms'][$key]['wtime'];
-				}
-				$urooms["user:".$uid]["lastwrite"] = $lastwrite;
+				$urooms["user:".$roomName]["lastwrite"] = self::getLastWriteTime( $urooms["user:".$roomName] );
 			}
 		}
 		$rooms = $grooms + $urooms; 
@@ -193,6 +178,42 @@ class OC_Conversations
 		}
 		// TODO: return type and title array $room = array( "type" => "...", "label" => ... );
 		return $room;
+	}
+
+	public static function getLastWriteTime( $room ) 
+	{
+		$roomType = $room['type'];
+		$roomName = $room['name'];
+		$lastwrite = 0;
+		if ( $roomType == 'group' ) {
+			$lastwrite = OCP\Config::getAppValue( 'conversations', 'conf', false );
+			$lastwrite = ( ! $lastwrite ) ? array() : unserialize( $lastwrite );
+			if ( isset($lastwrite['rooms']['group:'.$roomName]) && isset($lastwrite['rooms']['group:'.$roomName]['wtime']) ) {
+				$lastwrite = $lastwrite['rooms']['group:'.$roomName]['wtime'];
+			} else {
+				$lastwrite = 0;
+			}
+		}
+		if ( $roomType == 'user' ) {
+			$userId = OC_User::getUser();			
+			$roomKey = "user:" . $roomName;
+
+			$conf = OCP\Config::getUserValue( $roomName, 'conversations', 'conf', false );
+			$conf = ( ! $conf ) ? array() : unserialize( $conf );
+			
+			// add lastwr$uidite of a room (from me or the other persons config value)
+			$myConf = OCP\Config::getUserValue( $userId, 'conversations', 'conf', false );
+			$myConf = ( ! $conf ) ? array() : unserialize( $myConf );
+			
+			if ( isset($conf['rooms']['user:'.$userId]['wtime']) ) {
+				$lastwrite = $conf['rooms']['user:'.$userId]['wtime'];
+			}
+			if ( isset($myConf['rooms'][$roomKey]['wtime']) && $myConf['rooms'][$roomKey]['wtime'] > $lastwrite ) {
+				$lastwrite = $myConf['rooms'][$roomKey]['wtime'];
+			}
+		}
+		
+		return $lastwrite;
 	}
 
 	// write current time to user conf on reading a conversation or after a polling request
@@ -270,7 +291,7 @@ class OC_Conversations
 			if ( $wtime > $urtime ) {
 				// get newer comments than last user room read time
 				$new_comments = self::getConversation( $rkey, null, null, null, date( 'Y-m-d H:i:s', $urtime) );
-				$result[$rkey] = array( 'newmsgs' => count($new_comments) );
+				$result[$rkey] = array( 'newmsgs' => count($new_comments), 'lastwrite' => self::getLastWriteTime($room) );
 			}
 
 			// write onlinestatus
