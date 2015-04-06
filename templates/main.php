@@ -3,7 +3,6 @@
 	<?php if ( $_['allowPrivateMsg'] == "yes" || count($_['rooms']) > 1 ) : ?>
 		<?php		
 		$newMsgCounter = 0;
-
 		function prepNavRooms( $rooms ) {
 			$groups = array();
 			$users = array();
@@ -48,9 +47,8 @@
 								$newMsgCounter = $newMsgCounter + $room['newmsgs'];
 							} ?>
 						</span>
-						<span class="group-room-users">
-						<?php p( '- ' . implode(", ", $usersInGroup) ); ?>
-						<span class="group-room-users">
+						<span class="group-room-users" style="display:none"><?php p( implode(", ", $usersInGroup) ); ?></span>
+						<time class="navtimeago" style="display:none" datetime="<?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?>"><?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?></time>
 					</a>
 				</li>
 				<?php } ?> 
@@ -70,6 +68,7 @@
 								$newMsgCounter = $newMsgCounter + $room['newmsgs'];
 							} ?>
 						</span>
+						<time class="navtimeago" style="display:none" datetime="<?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?>"><?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?></time>
 						<img src="<?php echo OCP\Util::imagePath( 'conversations', 'online.svg' )?>" class="online" title="<?php p($l->t("online")); ?>" style="<?php if ( ! isset($room['online']) ) p('display:none'); ?>" />
 					</a>
 				</li>
