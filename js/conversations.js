@@ -30,6 +30,7 @@ OC.Conversations = {
 						$('#loading_conversation').addClass('hidden');
 					}
 	            }
+	            $.timeago.settings.localeTitle = true;
 	            $("time.timeago").timeago(); // init timeago
         		$('#loading_conversation').addClass('hidden');
 	        }, 'json');
@@ -119,7 +120,7 @@ OC.Conversations = {
 	polling : function() {
 		$.post(OC.filePath('conversations', 'ajax', 'polling.php'), {
         }, function(jsondata) {
-            if(jsondata.status == 'success') {
+        	if(jsondata.status == 'success') {
             	var hasNewMsgs = false;
             	var allNewMsgs = 0;
             	var playNotif = false;
@@ -139,14 +140,17 @@ OC.Conversations = {
 	            			var newmsgs = jsondata.data[rkey].newmsgs;
 	            			var rkeyclass = rkey.replace(/:/g, "-");
 
-	            			var oldNewMsg = $("li[data-room='" + rkey + "'] span").text().replace(/\(|\)/g, '');
+	            			var oldNewMsg = $("li[data-room='" + rkey + "'] span.new-msg-counter-room").text().replace(/\(|\)/g, '');
 	            			oldNewMsg = parseInt(oldNewMsg);
 	            			if ( newmsgs > oldNewMsg ) {
 	            				playNotif = true;
 	            			}
+	            			var lastwrite = new Date( parseInt(jsondata.data[rkey].lastwrite) * 1000 );
 
 	            			$("li[data-room='" + rkey + "']").addClass('new-msg');
-	            			$("li[data-room='" + rkey + "'] span.new-msg-counter-room").text( "(" + newmsgs + ")");
+	            			$("li[data-room='" + rkey + "'] span.new-msg-counter-room").text( "(" + newmsgs + ")");	            			
+							$("li[data-room='" + rkey + "'] .navtimeago").timeago( 'update', lastwrite );
+
 	            			allNewMsgs = allNewMsgs+newmsgs;
 	            		}
             		}   
@@ -300,7 +304,28 @@ $(document).ready(function(){
 
 	// first fill app-content
 	OC.Conversations.prefill();
-	$('#app-content').on('scroll', OC.Conversations.onScroll);
+	$('#app-content').on('scroll', OC.Conversations.onScroll);	
+
+	// set title for rooms
+	function setRoomTitle( el ) {
+		groupUsers = "";
+		var groupUsersEl = $(el).parent().find(".group-room-users");
+		if ( groupUsersEl.length > 0 ) {
+			groupUsers = t('conversations', 'User') + ": " + groupUsersEl.text() + "\n";
+		}
+		if ( $(el).attr("datetime") == "1970-01-01 00:00:00" ) {
+			$(el).parent().attr( "title", groupUsers + t('conversations', 'No comments') );
+		} else {
+			$(el).parent().attr( "title", groupUsers + t('conversations', 'Last comment') + ": " + $(el).text() );	
+		}
+	}
+
+	// set timego in rooms of last comment
+	$("time.navtimeago").bind('timeagoupdate', function() {
+		setRoomTitle( $(this) );
+	})
+	$("time.navtimeago").timeago();
+	$("time.navtimeago").each(function() { setRoomTitle( $(this) ); });	
 
 	// polling interval // TODO decrement polling-time slowly when nothing happens and on a lot of rooms
 	setInterval( function(){ OC.Conversations.polling(); }, 5000);	
