@@ -3,11 +3,7 @@
 	extract($post); ?>
 	<div class="comment" data-id="<?php p($id); ?>">
 		<div class="comment-header">
-			<?php if ( ! empty($avatar) ) { ?>
-				<div class="avatar">
-					<img src="<?php p($avatar); ?>" />
-				</div>
-			<?php } ?>
+			<div class="avatar" data-user="<?php echo $author; ?>"></div>		
 			<div class="author">
 				<strong><?php p(OC_User::getDisplayName($author)); ?></strong>				
 			</div>

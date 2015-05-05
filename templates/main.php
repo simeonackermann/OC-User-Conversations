@@ -55,14 +55,12 @@
 			<?php } ?>
 
 			<li class='user-label'><label><?php p($l->t("User")); ?></label></li>
-			<?php foreach($navRooms['user'] as $room) {
-				$avatar = OC_Conversations::getUserAvatar( $room['name'] ); ?>
+			<?php foreach($navRooms['user'] as $room) { ?>
 				<li class="user <?php if ($room['rid'] == $_['active_room']) p('active'); if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
 					data-type="user" data-room="<?php p($room['rid']); ?>">
 					<a class="" role="button">
 						<div class="avatar" data-user="<?php p($room['name']) ?>"></div>
-						<?php if ( !empty($avatar) ) { ?><img src="<?php p($avatar); ?>" class="avatar" /><?php }
-						p( OC_User::getDisplayName( $room['name'] ) ); ?>
+						<?php p( OC_User::getDisplayName( $room['name'] ) ); ?>
 						<span class="new-msg-counter-room">
 							<?php if ( isset($room['newmsgs']) && $room['rid'] != $_['active_room']) {
 								p("(" . $room['newmsgs'] . ")"); 
