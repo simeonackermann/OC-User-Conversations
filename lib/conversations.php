@@ -308,7 +308,6 @@ class OC_Conversations
 		$dateTimeObj = new DateTime($post['date']);
 		return array(
 			"id"		=> $post['id'],
-			"avatar"	=> self::getUserAvatar($post['author']),
 			"author"	=> $post['author'],
 			"date"		=> array(
 								'ISO8601' => $dateTimeObj->format(DateTime::ISO8601),
@@ -447,27 +446,6 @@ class OC_Conversations
 		} while ( ! self::isItemSharedWithGroup('folder', $path, $share_with, $owner, false) );
 
 		return $shared_path;
-	}
-
-	/*
-	Get user avatar from OC */
-	public static $avatars = array();
-	public static function getUserAvatar( $user )
-	{
-		if ( ! array_key_exists($user, self::$avatars) ) {
-			$avatar = New OC_Avatar($user);
-			$image = $avatar->get(32);
-			if ($image instanceof OC_Image) {
-				$imageUrl = OC_Helper::linkToRoute ( 'core_avatar_get', array ('user' => $user, 'size' => 32) ) . '?requesttoken='. OC::$server->getSession()->get('requesttoken');
-				self::$avatars[$user] = $imageUrl;
-			} else {
-				self::$avatars[$user] = '';
-			}
-		}
-
-		if ( self::$avatars[$user] != '' )
-			return self::$avatars[$user];
-		return '';
 	}
 
 	/*
