@@ -34,9 +34,10 @@
 	font-weight: bold;
 	color: #555;
 }
-#rooms img.avatar {
+#rooms .avatar {
 	margin: 5px 3px 0 0;
 	float: left;
+	height: 32px;
 }
 #rooms .new-msg {
 	/*background-image: url('%appswebroot%/conversations/img/blink.gif');*/
