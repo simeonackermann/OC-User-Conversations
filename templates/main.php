@@ -48,7 +48,7 @@
 							} ?>
 						</span>
 						<span class="group-room-users" style="display:none"><?php p( implode(", ", $usersInGroup) ); ?></span>
-						<time class="navtimeago" style="display:none" datetime="<?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?>"><?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?></time>
+						<time class="navtimeago" style="display:none" datetime="<?php p(date( DateTime::ISO8601, $room['lastwrite'])); ?>"><?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?></time>
 					</a>
 				</li>
 				<?php } ?> 
@@ -60,6 +60,7 @@
 				<li class="user <?php if ($room['rid'] == $_['active_room']) p('active'); if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
 					data-type="user" data-room="<?php p($room['rid']); ?>">
 					<a class="" role="button">
+						<div class="avatar" data-user="<?php p($room['name']) ?>"></div>
 						<?php if ( !empty($avatar) ) { ?><img src="<?php p($avatar); ?>" class="avatar" /><?php }
 						p( OC_User::getDisplayName( $room['name'] ) ); ?>
 						<span class="new-msg-counter-room">
@@ -68,7 +69,7 @@
 								$newMsgCounter = $newMsgCounter + $room['newmsgs'];
 							} ?>
 						</span>
-						<time class="navtimeago" style="display:none" datetime="<?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?>"><?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?></time>
+						<time class="navtimeago" style="display:none" datetime="<?php p(date(DateTime::ISO8601, $room['lastwrite'])); ?>"><?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?></time>
 						<img src="<?php echo OCP\Util::imagePath( 'conversations', 'online.svg' )?>" class="online" title="<?php p($l->t("online")); ?>" style="<?php if ( ! isset($room['online']) ) p('display:none'); ?>" />
 					</a>
 				</li>
@@ -105,13 +106,13 @@
 <div id="app-content">
 <?php if ( ! empty($_['rooms']) ) : ?>
 	<form id="new-comment" data-room="<?php p($_['active_room']); ?>">
-		<textarea id="new-comment-text" placeholder="<?php p($l->t("Message")); ?>..." tabindex="1"></textarea>
+		<textarea id="new-comment-text" placeholder="<?php p($l->t("Message")); ?>..." autofocus="" tabindex="3"></textarea>
 		<div id="new-comment-buttons" style="display:none">
 			<?php if ( $_['allowAttachment'] == "yes" && $_['active_room'] != "group:default"  && OCP\Share::isEnabled() ) { ?>
 				<div id="new-comment-attachment" data-attachment="" style="display:none"></div>
 				<a href="#" title="<?php p($l->t("Add file")); ?>" id="add-attachment"><img class="svg" alt="" src="<?php p(OC::$WEBROOT . '/core/img/places/folder.svg'); ?>" /></a>
 			<?php } ?>
-			<input type="submit" class="button" value="<?php p($l->t("Submit")); ?>" disabled="disabled" tabindex="2" title="(CTRL+Enter)" />
+			<input type="submit" class="button" value="<?php p($l->t("Submit")); ?>" disabled="disabled" tabindex="4" title="(CTRL+Enter)" />
 			<img src="<?php echo OCP\Util::imagePath( 'conversations', 'loading-small.gif' )?>" id="new-comment-loader" style="display:none" />
 			<br clear="both" />
 		</div>
