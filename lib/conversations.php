@@ -278,22 +278,20 @@ class OC_Conversations
 			if ( $room['type'] == "group" ) {
 				$conf = OCP\Config::getAppValue( 'conversations', 'conf', false );
 				$conf = ( ! $conf ) ? array() : unserialize( $conf );
-				$wtime = @$conf['rooms'][$rkey]['wtime'];
+				$wtime = $conf['rooms'][$rkey]['wtime'];
 				//$lastmsg = $conf['rooms'][$rkey]['lastmsg'];
 			} else {
 				$u2conf = OCP\Config::getUserValue( $room['name'], 'conversations', 'conf', false );
 				$u2conf = ( ! $u2conf ) ? array() : unserialize( $u2conf );
-				$wtime = @$u2conf['rooms']['user:'.$userId]['wtime']; // @ if user didnt logged in yet -> key rooms not exist								
+				$wtime = isset($u2conf['rooms']) ? $u2conf['rooms']['user:'.$userId]['wtime'] : 0;
 			}
-			$urtime = @$uconf['rooms'][$rkey]['rtime'];
+			$urtime = $uconf['rooms'][$rkey]['rtime'];
 
-			//$ulastmsg = $uconf['rooms'][$rkey]['lastmsg'];
 			if ( $wtime > $urtime ) {
 				// get newer comments than last user room read time
 				$new_comments = self::getConversation( $rkey, null, null, null, date( 'Y-m-d H:i:s', $urtime) );
 				$result[$rkey] = array( 'newmsgs' => count($new_comments), 'lastwrite' => self::getLastWriteTime($room) );
 			}
-
 			// write onlinestatus
 			if ( isset($room['online']) ) {
 					$result[$rkey]["online"] = true;
