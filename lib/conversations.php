@@ -188,7 +188,7 @@ class OC_Conversations
 		if ( $roomType == 'group' ) {
 			$lastwrite = OCP\Config::getAppValue( 'conversations', 'conf', false );
 			$lastwrite = ( ! $lastwrite ) ? array() : unserialize( $lastwrite );
-			if ( isset($lastwrite['rooms']['group:'.$roomName]) && isset($lastwrite['rooms']['group:'.$roomName]['wtime']) ) {
+			if ( isset($lastwrite['rooms']['group:'.$roomName]['wtime']) ) {
 				$lastwrite = $lastwrite['rooms']['group:'.$roomName]['wtime'];
 			} else {
 				$lastwrite = 0;
@@ -278,14 +278,14 @@ class OC_Conversations
 			if ( $room['type'] == "group" ) {
 				$conf = OCP\Config::getAppValue( 'conversations', 'conf', false );
 				$conf = ( ! $conf ) ? array() : unserialize( $conf );
-				$wtime = $conf['rooms'][$rkey]['wtime'];
+				$wtime = isset($conf['rooms'][$rkey]['wtime']) ? $conf['rooms'][$rkey]['wtime'] : 0;
 				//$lastmsg = $conf['rooms'][$rkey]['lastmsg'];
 			} else {
 				$u2conf = OCP\Config::getUserValue( $room['name'], 'conversations', 'conf', false );
 				$u2conf = ( ! $u2conf ) ? array() : unserialize( $u2conf );
-				$wtime = isset($u2conf['rooms']) ? $u2conf['rooms']['user:'.$userId]['wtime'] : 0;
+				$wtime = isset($u2conf['rooms']['user:'.$userId]['wtime']) ? $u2conf['rooms']['user:'.$userId]['wtime'] : 0;
 			}
-			$urtime = $uconf['rooms'][$rkey]['rtime'];
+			$urtime = isset($uconf['rooms'][$rkey]['rtime']) ? $uconf['rooms'][$rkey]['rtime'] : 0;
 
 			if ( $wtime > $urtime ) {
 				// get newer comments than last user room read time
