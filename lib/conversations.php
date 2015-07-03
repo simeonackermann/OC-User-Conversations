@@ -31,6 +31,7 @@ class OC_Conversations
 
 	// class vars
 	public static $rooms;
+	public static $room;
 	
 							// TODO: better arguments! 
 	public static function getConversation($room=false, $offset=0, $limit=5, $from_id=null, $from_date=null)
@@ -171,11 +172,16 @@ class OC_Conversations
 	// return active room from user value. If not exists return first room from rooms-list
 	public static function getRoom()
 	{		
+		if ( self::$room != NULL ) {
+			return self::$room;
+		}
+
 		$room = OCP\Config::getUserValue(OC_User::getUser(), 'conversations', 'activeRoom', false);
 		if ( $room == false ) {
 			foreach (self::getRooms() as $key => $value) break; // get the first key of rooms			
 			$room = isset($key) ? $key : "";
 		}
+		self::$room = $room;
 		// TODO: return type and title array $room = array( "type" => "...", "label" => ... );
 		return $room;
 	}
