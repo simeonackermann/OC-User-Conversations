@@ -108,11 +108,10 @@
 	opacity: 1;
 }
 #new-comment-attachment {
-	border-bottom: 1px dotted #ccc;
 	margin-bottom: 5px;
 }
 #new-comment-attachment img {
-	margin: 0 5px -16px 0px;
+	margin: 0 5px -12px 0px;
 }
 #new-comment-attachment .oc-dialog-close {
 	position: relative;
@@ -184,7 +183,7 @@
 	padding: 10px;
 }
 .comment-attachment img {
-	margin: 0 5px -14px 0px;
+	margin: 0 5px -12px 0px;
 }
 
 #no-users {
