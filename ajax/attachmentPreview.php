@@ -30,21 +30,23 @@ $path = isset($_POST['path']) ? $_POST['path'] : false;
 
 if ( $path ) {
 	$room = OC_Conversations::getRoom();
+	$room = explode(":", $room);
 	$userId = OC_User::getUser();
 	\OC_Util::setupFS($userId);
 	\OC\Files\Filesystem::initMountPoints($userId);
 	$view = new \OC\Files\View('/' . $userId . '/files');
 	$fileinfo = $view->getFileInfo($path);
-
+	$mimetype = $fileinfo['mimetype'];
 	$owner = $view->getOwner($path);
+	$download_url = OCP\Util::linkToRoute('download', array('file' => $path));
 		
 	if ( strpos( $fileinfo['mimetype'], "image") !== false ) {
 		$type = 'internal_image';
+		$icon_url = OC::$WEBROOT . "/index.php/core/preview.png?x=200&y=200&file=" . urlencode($path);		
 	} else {
 		$type = 'internal_file';
-	}
-
-	$download_url = OCP\Util::linkToRoute('download', array('file' => $path));
+		$icon_url = OC_Helper::mimetypeIcon( $mimetype );
+	}	
 
 	// File not found
 	if ( \OC\Files\Filesystem::is_file( $path ) == false ) {
@@ -55,33 +57,36 @@ if ( $path ) {
 	// array for attachment template
 	$tmpl_arr = array(
 		"type"	=> $type,
-		"mimetype"	=> $fileinfo['mimetype'],
+		"mimetype"	=> $mimetype,
 		"path"	=> $path,
 		"name"	=> $fileinfo['name'],
 		"download_url" => $download_url,
+		"icon_url" => $icon_url,
 	);
 
 	// result array for new comment attachment data
 	$data = array(
 		"type"		=> $type,
-		"fileid"	=> $fileinfo['fileid'],
-		"path"		=> urlencode($fileinfo['path']),
-		"owner"		=> $owner
+		"fileid"	=> $fileinfo['fileid']
 	);
-
-	$room_arr = explode(":", $room);
+	
 
 	$l=OC_L10N::get('conversations');	
 	// store attachment template into variable
 	$tmpl = new OCP\Template( 'conversations' , 'part.attachment' );
     $tmpl->assign( 'attachment' , $tmpl_arr );
+
     ob_start();
     	$tmpl->printPage();
-    	if ( $room_arr[0] == "group" ) {
-    		echo '<p>' . ($l->t("The file will be shared with the %s group.", $room_arr[1])) . '</p>';
-    	} else {
-    		echo '<p>' . ($l->t("The file will be shared with the user %s.", $room_arr[1])) . '</p>';
-    	}
+    	if ( ! OC_Conversations::isItemShared( $fileinfo['fileid'] ) ) {
+	    	if ( $room[0] == "group" ) {
+	    		echo '<p>' . ($l->t("The file will be shared with the %s group.", $room[1])) . '</p>';
+	    	} else {
+	    		echo '<p>' . ($l->t("The file will be shared with the user %s.", $room[1])) . '</p>';
+	    	}
+	    } else {
+	    	echo "<p></p>";
+	    }
 		$html = ob_get_contents();
 	ob_end_clean();
 
