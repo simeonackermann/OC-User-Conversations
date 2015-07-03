@@ -58,7 +58,7 @@ OC.Conversations = {
                 } 
 				$("#new-comment-loader").hide();
 				if ( highlight ) 
-					$(".comment:first-child").effect("bounce", {}, 400);
+					$(".comment:first-child").effect("highlight", {}, 500);
 
 				$("time.timeago").timeago(); // init timeago on change room
 				OC.Conversations.ShowAvatar( newMsgs );				
