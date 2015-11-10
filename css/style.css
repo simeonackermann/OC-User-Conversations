@@ -133,9 +133,10 @@
 
 .comment-header {
 	height: 32px;
-	background-color: #DCDCDC;
+	background-color: #F8F8F8;
 	padding: 5px;
 	border-radius: 3px;
+	border: 1px solid #EEE;
 }
 
 .comment-header .avatar {
@@ -146,8 +147,11 @@
 	vertical-align: baseline;
 	padding: 5px 0 0 5px;
 }
+.author strong {
+	font-weight: bold;
+}
 .comment-header .date {
-	float: left;
+	float: right;
 	color: gray;
 	padding: 5px 0 0 5px;
 }
