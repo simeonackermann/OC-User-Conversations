@@ -3,7 +3,7 @@
 	<id>conversations</id>
 	<name>User Conversations</name>
 	<description>A simple app for conversations, chats and talks between ownCloud users and groups.</description>
-	<version>0.2.2</version>
+	<version>0.2.3</version>
 	<licence>AGPL</licence>
 	<author>Simeon Ackermann</author>
 	<namespace>UserConversations</namespace>
