@@ -114,14 +114,16 @@ OC.Conversations = {
 		var self = this;
 		$.each( $('.avatar', env ), function( i, div ) {
 			var user = $(div).attr("data-user");
-			$(div).hide();			
+			$(div).hide();
 			if ( self.avatars.hasOwnProperty(user) ) {	
 				$(div).replaceWith( '<div class="avatar" data-user="'+user+'">'+self.avatars[user]+'</div>' );
 			} else {
 				self.avatars[user] = '';
-				$(div).avatar( user, 32, undefined, true, function( ) {
-					self.avatars[user] = $(div).html();	
-					self.ShowAvatar( env );
+				$(div).avatar( user, 32, undefined, true, function( a ) {
+					if ( $(div).html() != "" ) {
+						self.avatars[user] = $(div).html();
+						self.ShowAvatar( env );
+					}
 				});
 			}
 		});
