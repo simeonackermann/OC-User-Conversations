@@ -18,7 +18,7 @@ OC.Conversations_App = {
 					// add notif-icon in header bar for OC > 8
 					if ( parseInt(OC.config.version) >= 8 && $(".conversations-notification").length < 1 ) {
 						var conversationsUrl = OC.generateUrl('apps/conversations/');
-						$("#header #settings").after('<div class="conversations-notification" style="float:right;padding-top:22px;margin-right:-15px;">' + 
+						$("#header #settings").after('<div class="conversations-notification" style="float:right;padding-top:22px;margin-right:-10px;">' + 
 							'<a href="'+conversationsUrl+'" title="'+t('conversations', 'Conversation')+": "+t('conversations', 'New comments') +'" class="header-appname">' +
 								'<img src="'+iconSrc+'" style="width:80%" />'+
 							'</a></div>');
