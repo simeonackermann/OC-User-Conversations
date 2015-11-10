@@ -108,7 +108,7 @@
 		<div id="new-comment-buttons" style="display:none">
 			<?php if ( $_['allowAttachment'] == "yes" && $_['active_room'] != "group:default"  && OCP\Share::isEnabled() ) { ?>
 				<div id="new-comment-attachment" data-attachment="" style="display:none"></div>
-				<a href="#" title="<?php p($l->t("Add file")); ?>" id="add-attachment"><img class="svg" alt="" src="<?php p(OC::$WEBROOT . '/core/img/places/folder.svg'); ?>" /></a>
+				<a href="#" title="<?php p($l->t("Add file")); ?>" id="add-attachment"><img class="svg" alt="" src="<?php p(OC::$WEBROOT . '/core/img/filetypes/folder.svg'); ?>" /></a>
 			<?php } ?>
 			<input type="submit" class="button" value="<?php p($l->t("Submit")); ?>" disabled="disabled" tabindex="4" title="(CTRL+Enter)" />
 			<img src="<?php echo OCP\Util::imagePath( 'conversations', 'loading-small.gif' )?>" id="new-comment-loader" style="display:none" />
