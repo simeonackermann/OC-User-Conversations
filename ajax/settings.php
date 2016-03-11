@@ -23,7 +23,6 @@
 
 OCP\JSON::checkAppEnabled('conversations');
 OCP\JSON::checkLoggedIn();
-//OCP\JSON::callCheck();
 
 $key = isset($_POST['key']) ? $_POST['key'] : false;
 $value = isset($_POST['value']) ? $_POST['value'] : "no";

@@ -23,7 +23,6 @@
 
 OCP\JSON::checkAppEnabled('conversations');
 OCP\JSON::checkLoggedIn();
-//OCP\JSON::callCheck();
 
 $update = OC_Conversations::updateCheck();
 

@@ -23,7 +23,6 @@
 
 OCP\JSON::checkAppEnabled('conversations');
 OCP\JSON::checkLoggedIn();
-//OCP\JSON::callCheck();
 
 $comment = isset($_POST['comment']) ? $_POST['comment'] : false;
 $attachment = isset($_POST['attachment']) ? $_POST['attachment'] : false;

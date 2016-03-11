@@ -23,8 +23,6 @@
 
 OCP\JSON::checkAppEnabled('conversations');
 OCP\JSON::checkLoggedIn();
-//OCP\JSON::callCheck();
-
 
 $path = isset($_POST['path']) ? $_POST['path'] : false;
 
@@ -71,7 +69,8 @@ if ( $path ) {
 	);
 	
 
-	$l=OC_L10N::get('conversations');	
+	//$l=OC_L10N::get('conversations');	
+	$l = OCP\Util::getL10N('conversations');
 	// store attachment template into variable
 	$tmpl = new OCP\Template( 'conversations' , 'part.attachment' );
     $tmpl->assign( 'attachment' , $tmpl_arr );

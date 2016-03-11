@@ -40,7 +40,8 @@ OC_HOOK::connect('OC_User', 'post_removeFromGroup', 'OC_Conversations', 'changeU
 OC_HOOK::connect('OC_User', 'post_login', 'OC_Conversations', 'hook_login');
 OC_HOOK::connect('OC_User', 'logout', 'OC_Conversations', 'hook_logout');
 
-$l = OC_L10N::get('conversations');
+//$l = OC_L10N::get('conversations');
+$l = OCP\Util::getL10N('conversations');
 OCP\App::addNavigationEntry( array( 
 	'id' => 'conversations_index',
 	'order' => 5,
