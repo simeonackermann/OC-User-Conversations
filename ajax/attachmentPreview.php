@@ -43,7 +43,7 @@ if ( $path ) {
 		$icon_url = OC::$WEBROOT . "/index.php/core/preview.png?x=200&y=200&file=" . urlencode($path);		
 	} else {
 		$type = 'internal_file';
-		$icon_url = OC_Helper::mimetypeIcon( $mimetype );
+		$icon_url = \OC::$server->getMimeTypeDetector()->mimeTypeIcon( $mimetype );
 	}	
 
 	// File not found
