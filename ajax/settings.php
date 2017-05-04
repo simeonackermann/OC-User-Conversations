@@ -24,12 +24,40 @@
 OCP\JSON::checkAppEnabled('conversations');
 OCP\JSON::checkLoggedIn();
 
-$comment = isset($_POST['comment']) ? $_POST['comment'] : false;
-$attachment = isset($_POST['attachment']) ? $_POST['attachment'] : false;
+$key = isset($_POST['key']) ? $_POST['key'] : false;
+$value = isset($_POST['value']) ? $_POST['value'] : "no";
 
-if ( $comment || $attachment ) {
+if ( $key ) {
 
-	OC_Conversations::newComment( $comment, $attachment );
+	$success = true;
 
-    OCP\JSON::success(array());
+	switch ( $key ) {
+		case 'user_can_delete':
+			setConfig( 'userCanDelete', $value );
+			break;
+
+		case 'allow_attachment':
+			setConfig( 'allowAttachment', $value );
+			break;
+
+		case 'allow_single_msg':
+			setConfig( 'allowPrivateMsg', $value );
+			break;
+
+		case 'group_only_private_msg':
+			setConfig( 'groupOnlyPrivateMsg', $value );
+			break;
+		
+		default:
+			$success = false;
+			break;
+	}
+
+	if ( $success ) {
+		OCP\JSON::success(array());
+	}	
+}
+
+function setConfig( $key, $value ) {	
+	OCP\Config::setAppValue( 'conversations', $key, $value );
 }

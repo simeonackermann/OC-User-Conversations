@@ -181,6 +181,7 @@
     if (!isNaN(data.datetime)) {
       if ( $s.cutoff == 0 || Math.abs(distance(data.datetime)) < $s.cutoff) {
         $(this).text(inWords(data.datetime));
+        $(this).trigger('timeagoupdate');
       }
     }
     return this;

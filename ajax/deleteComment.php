@@ -23,7 +23,6 @@
 
 OCP\JSON::checkAppEnabled('conversations');
 OCP\JSON::checkLoggedIn();
-OCP\JSON::callCheck();
 
 $id = isset($_POST['id']) ? $_POST['id'] : false;
 

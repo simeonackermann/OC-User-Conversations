@@ -1,78 +1,149 @@
-<?php 
-if ( isset ($_['rooms']) ) : 
+<div id="app-navigation">
+<?php if ( ! empty($_['rooms']) ) : ?>
+	<?php if ( $_['allowPrivateMsg'] == "yes" || count($_['rooms']) > 1 ) : ?>
+		<?php		
+		$newMsgCounter = 0;
+		function prepNavRooms( $rooms ) {
+			$groups = array();
+			$users = array();
+			foreach($rooms as $rid => $room) {
+				$room['rid'] = $rid;
+				if ( $room['type'] == "group" ) {
+					$groups[] = $room;
+				} else {
+					$users[] = $room;
+				}
+			}
 
-	if ( UC_SINGLE_USER_MSG || count($_['rooms']) > 1 ) : ?>
+			uasort($groups, function( $a, $b) {
+				return ($a['lastwrite'] >= $b['lastwrite']) ? -1 : 1;
+			} );
 
-		<div id="app-navigation">
-			<ul id="rooms">
-				<?php 
-				$showGroups = true;
-				$showUsers = true;
-				$newMsgCounter = 0;
-				foreach($_['rooms'] as $rid => $room) :
-					$room_name = $room['name'];
-					if ( $room['type'] == "group" && $showGroups ) {
-						$showGroups = false; ?>
-						<li class='user-label'><label><?php p($l->t("Groups")); ?></label></li>
-					<?php }
-					if ( $room['type'] == "user" ) {
-						$room_name = OC_User::getDisplayName( $room['name'] );
-						$avatar = OC_Conversations::getUserAvatar( $room['name'] );
-						if ( $showUsers ) {
-							$showUsers = false; ?>
-							<li class='user-label'><label><?php p($l->t("User")); ?></label></li>
-						<?php }
-					} ?>
-					<li class="<?php p($room['type']); ?> <?php if ($rid == $_['active_room']) p('active'); ?> <?php if ( isset($room['newmsgs']) ) p('new-msg'); ?>"
-						data-type="<?php p($room['type']); ?>" data-room="<?php p($rid); ?>">
-						<a class="" role="button">
-							<?php if ( !empty($avatar) ) { ?><img src="<?php p($avatar); ?>" /><?php }
-							p($room_name); ?>
-							<span>
-								<?php
-								if ( isset($room['newmsgs']) && $rid != $_['active_room']) {
-									p("(" . $room['newmsgs'] . ")"); 
-									$newMsgCounter = $newMsgCounter + $room['newmsgs'];
-								}
-								?>
-							</span>
-						</a>
-					</li>
-				<?php endforeach; ?>
-			</ul>
-			<input type="hidden" id="uc-new-msg-counter" value="<?php echo $newMsgCounter; ?>" />
-		</div>
+			uasort($users, function( $a, $b) {
+				return ($a['lastwrite'] >= $b['lastwrite']) ? -1 : 1;
+			} );
 
+			return array( 'groups' => $groups, 'user' => $users );
+
+		}
+		$navRooms = prepNavRooms( $_['rooms'] );
+		?>
+
+		<ul id="rooms">
+			<?php if ( count($navRooms['groups'])>0 ) { ?>
+				<li class='user-label'><label><?php p($l->t("Groups")); ?></label></li>
+				<?php foreach($navRooms['groups'] as $room) { 
+					$usersInGroup = array();
+					foreach ( OC_Group::usersInGroup($room['name']) as $userInGroup) {
+					 	$usersInGroup[] =  OC_User::getDisplayName( $userInGroup );
+					 } ?>				
+					<li class="group <?php if ($room['rid'] == $_['active_room']) p('active'); if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
+						data-type="group" data-room="<?php p($room['rid']); ?>">
+					<a class="" role="button">
+						<?php p($room['name']); ?>
+						<span class="new-msg-counter-room">
+							<?php if ( isset($room['newmsgs']) && $room['rid'] != $_['active_room']) {
+								p("(" . $room['newmsgs'] . ")"); 
+								$newMsgCounter = $newMsgCounter + $room['newmsgs'];
+							} ?>
+						</span>
+						<span class="group-room-users" style="display:none"><?php p( implode(", ", $usersInGroup) ); ?></span>
+						<time class="navtimeago" style="display:none" datetime="<?php p(date( DateTime::ISO8601, $room['lastwrite'])); ?>"><?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?></time>
+					</a>
+				</li>
+				<?php } ?> 
+			<?php } ?>
+
+			<li class='user-label'><label><?php p($l->t("User")); ?></label></li>
+			<?php foreach($navRooms['user'] as $room) { ?>
+				<li class="user <?php if ($room['rid'] == $_['active_room']) p('active'); if ( isset($room['newmsgs']) ) p('new-msg'); ?>" 
+					data-type="user" data-room="<?php p($room['rid']); ?>">
+					<a class="" role="button">
+						<div class="avatar" data-user="<?php p($room['name']) ?>"></div>
+						<?php p( OC_User::getDisplayName( $room['name'] ) ); ?>
+						<span class="new-msg-counter-room">
+							<?php if ( isset($room['newmsgs']) && $room['rid'] != $_['active_room']) {
+								p("(" . $room['newmsgs'] . ")"); 
+								$newMsgCounter = $newMsgCounter + $room['newmsgs'];
+							} ?>
+						</span>
+						<time class="navtimeago" style="display:none" datetime="<?php p(date(DateTime::ISO8601, $room['lastwrite'])); ?>"><?php p(date( 'Y-m-d H:i:s', $room['lastwrite'])); ?></time>
+						<img src="<?php echo OCP\Util::imagePath( 'conversations', 'online.svg' )?>" class="online" title="<?php p($l->t("online")); ?>" style="<?php if ( ! isset($room['online']) ) p('display:none'); ?>" />
+					</a>
+				</li>
+			<?php } ?> 			
+		</ul>
+		<input type="hidden" id="uc-new-msg-counter" value="<?php echo $newMsgCounter; ?>" />
 	<?php endif; ?>
-
-	<div id="app-content">
-		<form id="new-comment" data-room="<?php p($_['active_room']); ?>">
-			<textarea id="new-comment-text" placeholder="<?php p($l->t("Message")); ?>..." tabindex="1"></textarea>
-			<div id="new-comment-buttons" style="display:none">
-				<?php if ( USER_CONVERSATIONS_ATTACHMENTS && $_['active_room'] != "group:default"  && OCP\Share::isEnabled() ) { ?>
-					<div id="new-comment-attachment" data-attachment="" style="display:none"></div>
-					<a href="#" title="<?php p($l->t("Add file")); ?>" id="add-attachment"><img class="svg" alt="" src="<?php p(OC::$WEBROOT . '/core/img/places/folder.svg'); ?>" /></a>
-				<?php } ?>
-				<input type="submit" class="button" value="<?php p($l->t("Submit")); ?>" disabled="disabled" tabindex="2" />
-				<br clear="both" />
-			</div>
-		</form>
-
-		<div id="conversation">
-			<?php echo $this->inc('part.conversation'); ?>
-		</div>
-
-		<?php
-		// Dummy navigation. Needed for endless scrolling
-		if (isset($_['nextpage'])) : ?>
-			<nav id="page-nav">
-		  		<a href="<?php p($_['nextpage']); ?>"></a>
-			</nav>
-		<?php endif; ?>	
-	</div>
-
-<?php else: ?>
-
-	<div id="app-content"><div id="firstrun"><p>Sorry, coulnd't find any user or group. Please create some in <a href="<?php echo OCP\Util::linkTo( 'index.php/settings', 'users' ); ?>">ownCloud user settings</a>.</p></div></div>
-
 <?php endif; ?>
+	<?php
+	if ( OC_User::isAdminUser( OC_User::getUser() ) ) { ?>
+		<div id="app-settings">
+			<div id="app-settings-header">
+				<button class="settings-button" data-apps-slide-toggle="#app-settings-content"></button>
+			</div>
+			<div id="app-settings-content">
+				<p><strong>Admin Settings</strong></p>
+				<p><input type="checkbox"<?php if ($_['userCanDelete']=="yes"): ?> checked="checked"<?php endif; ?> id="user_can_delete" />
+				<label for="user_can_delete"><?php p($l->t('Users can delete their messages (admins all)'));?></label>
+				</p><p>
+				<input type="checkbox"<?php if ($_['allowAttachment']=="yes"): ?> checked="checked"<?php endif; ?> id="allow_attachment" />
+				<label for="allow_attachment"><?php p($l->t('Enable attachments'));?></label>
+				</p><p>
+				<input type="checkbox"<?php if ($_['allowPrivateMsg']=="yes"): ?> checked="checked"<?php endif; ?> id="allow_single_msg" />
+				<label for="allow_single_msg"><?php p($l->t('Enable private user messages'));?></label>
+				</p><p>
+				<input type="checkbox"<?php if ($_['groupOnlyPrivateMsg']=="yes"): ?> checked="checked"<?php endif; ?> id="group_only_private_msg" />
+				<label for="group_only_private_msg"><?php p($l->t('Enable private user messages only for users in same groups'));?></label>
+				</p>
+			</div>
+		</div>
+	<?php } ?>
+</div>
+
+<div id="app-content">
+<?php if ( ! empty($_['rooms']) ) : ?>
+	<form id="new-comment" data-room="<?php p($_['active_room']); ?>">
+		<textarea id="new-comment-text" placeholder="<?php p($l->t("Message")); ?>..." autofocus="" tabindex="3"></textarea>
+		<div id="new-comment-buttons" style="display:none">
+			<?php if ( $_['allowAttachment'] == "yes" && $_['active_room'] != "group:default"  && OCP\Share::isEnabled() ) { ?>
+				<div id="new-comment-attachment" data-attachment="" style="display:none"></div>
+				<a href="#" title="<?php p($l->t("Add file")); ?>" id="add-attachment"><img class="svg" alt="" src="<?php p(OC::$WEBROOT . '/core/img/filetypes/folder.svg'); ?>" /></a>
+			<?php } ?>
+			<input type="submit" class="button" value="<?php p($l->t("Submit")); ?>" disabled="disabled" tabindex="4" title="(CTRL+Enter)" />
+			<img src="<?php echo OCP\Util::imagePath( 'conversations', 'loading-small.gif' )?>" id="new-comment-loader" style="display:none" />
+			<br clear="both" />
+		</div>
+	</form>
+
+	<div id="conversation"></div>
+
+	<div id="loading_conversation" class="icon-loading"></div>
+	<div id="no_more_conversation" class="hidden"><?php p($l->t("No more comments to load")); ?></div>
+	<div id="no_conversation" class="hidden"><?php p($l->t("No comments to load")); ?></div>
+	<audio preload src="<?php p(OC_App::getAppWebPath("conversations") . '/src/new.mp3'); ?>" id="conversations-sound-notif">
+		<source src="<?php p(OC_App::getAppWebPath("conversations") . '/src/new.ogg'); ?>">
+	</audio>
+</div>
+
+<?php 
+$ocVersion = OCP\Util::getVersion();
+if ( $ocVersion[0] >= 7 ) { ?>
+	<style type="text/css">
+	@media only screen and (min-width: 768px) {
+		#app-content {	
+			margin-left: 250px;
+		}
+	}
+	@media only screen and (max-width: 768px) {
+		#app-content {	
+			padding: 37px 5px 0px 5px;
+			margin-left: 0px;
+		}
+	}		
+	</style>
+<?php } ?>
+<?php else: ?>
+	<div id="no-users"><p>Please add some other users or groups in <a href="<?php echo OCP\Util::linkTo( 'index.php/settings', 'users' ); ?>">ownCloud user settings</a> to start chatting...</p></div>
+<?php endif; ?>
+</div>

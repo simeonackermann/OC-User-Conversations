@@ -2,17 +2,25 @@
 	color: #555;
 }
 #app-navigation {
-	width: 150px;	
+	width: 250px;
 	position: fixed;
 }
-
 #app-content {	
 	position: relative;	
+	/*
 	width: 80%;
 	height: auto;
-	y-overflow: auto;
+	overflow-y: auto;
 	max-width: 800px;
-	padding: 25px 40px 0px 40px;		
+	padding: 25px 15px 0px 15px;
+	*/	
+	margin-left: 250px;
+
+	height: 100%;
+
+}
+#conversation {
+	padding: 25px 30% 0px 15px;
 }
 #page-nav {
 	margin: 0 0 40px 0;
@@ -26,9 +34,10 @@
 	font-weight: bold;
 	color: #555;
 }
-#rooms img {
+#rooms .avatar {
 	margin: 5px 3px 0 0;
 	float: left;
+	height: 32px;
 }
 #rooms .new-msg {
 	/*background-image: url('%appswebroot%/conversations/img/blink.gif');*/
@@ -40,16 +49,25 @@
 	font-style: italic;
 	display: block;
 }
+#rooms img.online {
+	position: absolute;
+	margin-top: 14px;
+	right: 7px;
+}
 
 #new-comment {	
-	width:70%; 
+	width:50%; 
+	max-width: 600px;
 	border:1px solid #ccc;
-	margin: 7px 0 10px 0;
+	margin: 32px 0 10px 15px;
 	border-radius: 3px;
 }
 @media all and (max-width: 480px) {
 	#new-comment {
-		width: 100%;
+		width: 90%;
+	}
+	#conversation {
+		padding-right: 15px;
 	}
 }
 #new-comment-text {
@@ -90,11 +108,10 @@
 	opacity: 1;
 }
 #new-comment-attachment {
-	border-bottom: 1px dotted #ccc;
 	margin-bottom: 5px;
 }
 #new-comment-attachment img {
-	margin: 0 5px -16px 0px;
+	margin: 0 5px -12px 0px;
 }
 #new-comment-attachment .oc-dialog-close {
 	position: relative;
@@ -111,13 +128,15 @@
 
 .comment {
 	margin-bottom: 15px;
+	max-width: 800px;
 }
 
 .comment-header {
 	height: 32px;
-	background-color: #DCDCDC;
+	background-color: #F8F8F8;
 	padding: 5px;
 	border-radius: 3px;
+	border: 1px solid #EEE;
 }
 
 .comment-header .avatar {
@@ -128,8 +147,11 @@
 	vertical-align: baseline;
 	padding: 5px 0 0 5px;
 }
+.author strong {
+	font-weight: bold;
+}
 .comment-header .date {
-	float: left;
+	float: right;
 	color: gray;
 	padding: 5px 0 0 5px;
 }
@@ -137,15 +159,17 @@
 	cursor: pointer;
 }
 .comment-header .delete {
-	float: right;
+	text-align: right;
 }
 
 .comment-header a.action.delete {
-	opacity: 0;	
+	display: none;
+	opacity: 0;		
 	padding: 9px 14px 19px !important;
 }
 .comment-header:hover a.action.delete {
 	opacity: 0.5;
+	display: inline;
 }
 .comment-header a.action.delete:hover {
 	opacity: 1;
@@ -163,24 +187,33 @@
 	padding: 10px;
 }
 .comment-attachment img {
-	margin: 0 5px -14px 0px;
+	margin: 0 5px -12px 0px;
 }
 
-#infscr-loading { 
-	background: #000000;
-	border-radius: 10px;
-	bottom: 40px;
-	color: #FFFFFF;
-	left: 45%;
-	opacity: 0.8;
-	padding: 10px;
-	position: fixed;
+#no-users {
+	position: absolute;
 	text-align: center;
-	width: 200px;
-	z-index: 100;
+	width: 100%;
+	top: 40%;
+	margin-left: -250px;
 }
 
-#firstrun {
-	height: 100%;
-	
+#loading_conversation {
+    height: 50px;
+    padding: 20px;
+    margin: 40px;
+    background-position: center left;
+}
+#no_more_conversation,
+#no_conversation { 
+    padding: 50px 0px;
+    z-index: 100;
+    margin: 40px;
+    color: #555;
+}
+#app-settings-content p {
+	padding-left: 18px;
+}
+#app-settings-content input {
+	margin-left: -18px;
 }

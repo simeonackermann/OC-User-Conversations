@@ -21,41 +21,30 @@
 * 
 */
 
-/*
-### CONFIG ###
------------------------------------------------------ */
-/* Allow that users can delete own posts, admin can delete all */
-define('USER_CONVERSATIONS_CAN_DELETE', true);
-
-
-/* Allow messages to a single user */
-define('UC_SINGLE_USER_MSG', true);
-
-
-/* FILE ATACHMENTS 
-This is a beta feature with some known bugs. It could changed in a future release without backward compatibility! */
-define('USER_CONVERSATIONS_ATTACHMENTS', true);
-
-/* end of configration ------------------------------ */
-
-
 // register model-file
 OC::$CLASSPATH['OC_Conversations'] = 'conversations/lib/conversations.php';
 
-// add update script to change the app-icon
-if ( ! OCP\App::checkAppEnabled('conversations') ) {
-	OCP\Util::addscript('conversations','updateCheck');
-}
+// set default config setttings
+OC_Conversations::$userCanDelete = OCP\Config::getAppValue( 'conversations', 'userCanDelete', "no" );
+OC_Conversations::$allowAttachment = OCP\Config::getAppValue( 'conversations', 'allowAttachment', "yes" );
+OC_Conversations::$allowPrivateMsg = OCP\Config::getAppValue( 'conversations', 'allowPrivateMsg', "yes" );
+OC_Conversations::$groupOnlyPrivateMsg = OCP\Config::getAppValue( 'conversations', 'groupOnlyPrivateMsg', "no" );
 
-// register HOOK change user group
+// add update script to change the app-icon even when app is not active, TODO: find app-not-active function...!
+// OC::$server->getNavigationManager()->getActiveEntry() != "conversations_index"	
+OCP\Util::addscript('conversations','globalPolling');
+
+// register HOOKs
 OC_HOOK::connect('OC_User', 'post_addToGroup', 'OC_Conversations', 'changeUserGroup');
 OC_HOOK::connect('OC_User', 'post_removeFromGroup', 'OC_Conversations', 'changeUserGroup');
+OC_HOOK::connect('OC_User', 'post_login', 'OC_Conversations', 'hook_login');
+OC_HOOK::connect('OC_User', 'logout', 'OC_Conversations', 'hook_logout');
 
-$l=OC_L10N::get('conversations');
+$l = OCP\Util::getL10N('conversations');
 OCP\App::addNavigationEntry( array( 
-	'id' => 'conversations',
+	'id' => 'conversations_index',
 	'order' => 5,
-	'href' => OCP\Util::linkTo( 'conversations', 'index.php' ),
-	'icon' => OCP\Util::imagePath( 'conversations', 'conversations.png' ),
+	'href' => OCP\Util::linkToRoute('conversations_index'),
+	'icon' => OCP\Util::imagePath( 'conversations', 'conversations.svg' ),
 	'name' => $l->t('Conversation'),
 ));

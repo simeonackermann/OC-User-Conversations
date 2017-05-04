@@ -23,15 +23,25 @@
 
 class OC_Conversations
 {
+	// app config var
+	public static $userCanDelete;
+	public static $allowAttachment;
+	public static $allowPrivateMsg;
+	public static $groupOnlyPrivateMsg;
 
+	// class vars
+	public static $rooms;
+	public static $room;
+	
 							// TODO: better arguments! 
 	public static function getConversation($room=false, $offset=0, $limit=5, $from_id=null, $from_date=null)
 	{	
 		$userId = OC_User::getUser();			
 		$room = ( $room ) ? $room : self::getRoom();
-		$rtype = explode(":", $room);
+		$rtype = explode(":", $room);			
 
-		if ( $rtype[0] == "user" && UC_SINGLE_USER_MSG == true ) {			
+		//if ( $rtype[0] == "user" && UC_SINGLE_USER_MSG == true ) {			
+		if ( $rtype[0] == "user" ) {
 			// get user rooms: msgs to user X from me OR to me from user X
 			$and = array( "( ( room = ? AND author = ? ) OR ( room = ? AND author = ? ) )" );
 			$args = array($room, $userId, 'user:' . $userId, $rtype[1]);
@@ -71,7 +81,7 @@ class OC_Conversations
 		$room = self::getRoom();
 		$userId = OC_User::getUser();
 
-		if ( USER_CONVERSATIONS_ATTACHMENTS &&  OCP\Share::isEnabled() && ! empty($attachment) ) {
+		if ( OCP\Share::isEnabled() && ! empty($attachment) ) {
 			self::shareAttachment($attachment);
 		}
 
@@ -88,7 +98,7 @@ class OC_Conversations
 	}
 
 	public static function deleteComment( $id ) {
-		if ( ! USER_CONVERSATIONS_CAN_DELETE ) 
+		if ( self::$userCanDelete == "no" ) 
 			return false;
 
 		$query = OCP\DB::prepare('SELECT author FROM *PREFIX*conversations WHERE id = ?');
@@ -109,40 +119,107 @@ class OC_Conversations
 		$urooms = array();
 		$userId = OC_User::getUser();
 		$ordering = array();
+		if ( self::$rooms != NULL ) {
+			return self::$rooms;
+		}
 		// add groups the user contains if more than the user himself is in the room
 		foreach (OC_Group::getUserGroups($userId) as $group) {
 			if ( count(OC_Group::usersInGroup($group)) > 1 ) {
 				$grooms["group:".$group] = array( "type" => "group", "name" => $group );
-				/*if ( UC_ROOM_ONLY_MSGS ) { // TODO: option: maybe private msgs only to users in same rooms ?					
-				} */
+				$grooms["group:".$group]["lastwrite"] = self::getLastWriteTime( $grooms["group:".$group] );
 			}
 		}
-		// if no group exist create default; NEW in 0.2: no default room!
-		//if ( empty($grooms) )
-		//	$grooms["group:default"] = array( "type" => "group", "name" => "default" );
 
-		// add all other users
-		if ( UC_SINGLE_USER_MSG == true ) {
-			foreach (OC_User::getUsers() as $user) {
-				if ( $userId != $user ) {
-					$urooms["user:".$user] = array( "type" => "user", "name" => $user );
+		// add single users
+		if ( self::$allowPrivateMsg == "yes" ) {
+			$groupMembersOnly = false;
+			if ( class_exists('OC\\Share\\Share') ) {
+				$groupMembersOnly = OC\Share\Share::shareWithGroupMembersOnly();
+			}
+
+			if ( $groupMembersOnly || self::$groupOnlyPrivateMsg == "yes" ) {  // add only users in same groups
+				foreach (OC_Group::getUserGroups($userId) as $group) {
+					foreach (OC_Group::usersInGroup($group) as $user) {
+						if ( $userId != $user ) {
+							$urooms["user:".$user] = array( "type" => "user", "name" => $user );
+						}
+					}
 				}
+			} else { // add all other users
+				foreach (OC_User::getUsers() as $user) {
+					if ( $userId != $user ) {
+						$urooms["user:".$user] = array( "type" => "user", "name" => $user );
+					}
+				}
+			}
+			// add lastwrite time and add onlinestatus as online if user is logged in and last update is not older than 31 seconds (2 polling periods)
+			foreach ($urooms as $key => $value) {
+				$roomName = $value["name"];
+
+				$conf = OCP\Config::getUserValue( $roomName, 'conversations', 'conf', false );
+				$conf = ( ! $conf ) ? array() : unserialize( $conf );
+				if ( isset($conf["onlinestatus"]) && $conf["onlinestatus"] == "online" && ( time() - $conf["lastupdate"] ) <= 31  ) {
+					$urooms["user:".$roomName]["online"] = true;
+				}
+				$urooms["user:".$roomName]["lastwrite"] = self::getLastWriteTime( $urooms["user:".$roomName] );
 			}
 		}
 		$rooms = $grooms + $urooms; 
+		self::$rooms = $rooms;
 		return $rooms;
 	}	
 
 	// return active room from user value. If not exists return first room from rooms-list
 	public static function getRoom()
 	{		
+		if ( self::$room != NULL ) {
+			return self::$room;
+		}
+
 		$room = OCP\Config::getUserValue(OC_User::getUser(), 'conversations', 'activeRoom', false);
 		if ( $room == false ) {
-			foreach (self::getRooms() as $key => $value) break; // get the first key of rooms
-			$room = $key;
+			foreach (self::getRooms() as $key => $value) break; // get the first key of rooms			
+			$room = isset($key) ? $key : "";
 		}
+		self::$room = $room;
 		// TODO: return type and title array $room = array( "type" => "...", "label" => ... );
 		return $room;
+	}
+
+	public static function getLastWriteTime( $room ) 
+	{
+		$roomType = $room['type'];
+		$roomName = $room['name'];
+		$lastwrite = 0;
+		if ( $roomType == 'group' ) {
+			$lastwrite = OCP\Config::getAppValue( 'conversations', 'conf', false );
+			$lastwrite = ( ! $lastwrite ) ? array() : unserialize( $lastwrite );
+			if ( isset($lastwrite['rooms']['group:'.$roomName]['wtime']) ) {
+				$lastwrite = $lastwrite['rooms']['group:'.$roomName]['wtime'];
+			} else {
+				$lastwrite = 0;
+			}
+		}
+		if ( $roomType == 'user' ) {
+			$userId = OC_User::getUser();			
+			$roomKey = "user:" . $roomName;
+
+			$conf = OCP\Config::getUserValue( $roomName, 'conversations', 'conf', false );
+			$conf = ( ! $conf ) ? array() : unserialize( $conf );
+			
+			// add lastwr$uidite of a room (from me or the other persons config value)
+			$myConf = OCP\Config::getUserValue( $userId, 'conversations', 'conf', false );
+			$myConf = ( ! $conf ) ? array() : unserialize( $myConf );
+			
+			if ( isset($conf['rooms']['user:'.$userId]['wtime']) ) {
+				$lastwrite = $conf['rooms']['user:'.$userId]['wtime'];
+			}
+			if ( isset($myConf['rooms'][$roomKey]['wtime']) && $myConf['rooms'][$roomKey]['wtime'] > $lastwrite ) {
+				$lastwrite = $myConf['rooms'][$roomKey]['wtime'];
+			}
+		}
+		
+		return $lastwrite;
 	}
 
 	// write current time to user conf on reading a conversation or after a polling request
@@ -154,7 +231,7 @@ class OC_Conversations
 		$conf = ( ! $conf ) ? array() : unserialize( $conf );
 		$conf['rooms'][$room]['rtime'] = time();
 
-		OCP\Config::setUserValue( $userId, 'conversations', 'conf', serialize($conf));				
+		OCP\Config::setUserValue( $userId, 'conversations', 'conf', serialize($conf));
 	}
 
 	
@@ -203,23 +280,27 @@ class OC_Conversations
 
 		foreach (self::getRooms() as $rkey => $room) {
 			//$rtype = explode(":", $room);
+			$onlinestatus = false;
 			if ( $room['type'] == "group" ) {
 				$conf = OCP\Config::getAppValue( 'conversations', 'conf', false );
 				$conf = ( ! $conf ) ? array() : unserialize( $conf );
-				$wtime = @$conf['rooms'][$rkey]['wtime'];
+				$wtime = isset($conf['rooms'][$rkey]['wtime']) ? $conf['rooms'][$rkey]['wtime'] : 0;
 				//$lastmsg = $conf['rooms'][$rkey]['lastmsg'];
 			} else {
 				$u2conf = OCP\Config::getUserValue( $room['name'], 'conversations', 'conf', false );
 				$u2conf = ( ! $u2conf ) ? array() : unserialize( $u2conf );
-				$wtime = @$u2conf['rooms']['user:'.$userId]['wtime']; // @ if user didnt logged in yet -> key rooms not exist				
+				$wtime = isset($u2conf['rooms']['user:'.$userId]['wtime']) ? $u2conf['rooms']['user:'.$userId]['wtime'] : 0;
 			}
-			$urtime = @$uconf['rooms'][$rkey]['rtime'];
+			$urtime = isset($uconf['rooms'][$rkey]['rtime']) ? $uconf['rooms'][$rkey]['rtime'] : 0;
 
-			//$ulastmsg = $uconf['rooms'][$rkey]['lastmsg'];
 			if ( $wtime > $urtime ) {
 				// get newer comments than last user room read time
 				$new_comments = self::getConversation( $rkey, null, null, null, date( 'Y-m-d H:i:s', $urtime) );
-				$result[$rkey] = array( 'newmsgs' => count($new_comments) );
+				$result[$rkey] = array( 'newmsgs' => count($new_comments), 'lastwrite' => self::getLastWriteTime($room) );
+			}
+			// write onlinestatus
+			if ( isset($room['online']) ) {
+					$result[$rkey]["online"] = true;
 			}
 		}
         return $result;
@@ -231,8 +312,7 @@ class OC_Conversations
 		$dateTimeObj = new DateTime($post['date']);
 		return array(
 			"id"		=> $post['id'],
-			"avatar"	=> self::getUserAvatar($post['author']),
-			"author"	=> OC_User::getDisplayName($post['author']),
+			"author"	=> $post['author'],
 			"date"		=> array(
 								'ISO8601' => $dateTimeObj->format(DateTime::ISO8601),
 								'datetime'=>  date( 'Y-m-d H:i\h', strtotime($post['date']) )
@@ -258,63 +338,41 @@ class OC_Conversations
 
 	/*
 	get attachments for printing posts */
-	private static function getAttachment($attachment) {		
-		$attachment = json_decode($attachment, true);		
-		switch ($attachment['type']) {
-			case 'internal_file':
-				return self::getInternalFileAttachment($attachment);
-				break;
+	private static function getAttachment($attachment) {
+		$attachment = json_decode($attachment, true);
+		$result = array();
 
-			case 'internal_image':
-				return self::getInternalFileAttachment($attachment);
-				break;
-			
-			default:
-				return array();
-				break;
-		}
-	}	
-
-	/*
-	Get internal file attachments for printing posts */
-	private static function getInternalFileAttachment($attachment) {
-		$path = urldecode($attachment['path']);
-		$path = substr($path, strpos($path, "/")+1 ); //remove root folder
-		
-		if ( $attachment['owner'] == OC_User::getUser() ) {
-			// file-owner can use own path
-			$path = \OC\Files\Filesystem::getPath($attachment['fileid']);
-		} else {			
-			$item_shared = OCP\Share::getItemSharedWithBySource('file', $attachment['fileid']);			
-			if ( $item_shared != false ) { // if item is direct shared use shared-file target
-				$path = "/Shared" . $item_shared['file_target'];
-			} else {
-				// else search shared parent folder
-				$path = "/Shared/" . self::getInheritedSharedPath( $attachment['owner'], urldecode($attachment['path']) );
-			}
-		}
-			
 		$userId = OC_User::getUser();
 		$view = new \OC\Files\View('/' . $userId . '/files');
-		$fileinfo = $view->getFileInfo($path);
 
-		$download_url = OCP\Util::linkToRoute('download', array('file' => $path));		
+		$path = $view->getPath( $attachment['fileid'] );
+		$mimetype = $view->getMimeType( $path );
+		$download_url = OCP\Util::linkToRoute('download', array('file' => $path));
+		$name = basename($path);
+		$type = $attachment['type'];
+		if ( $type == 'internal_image' ) {
+			$icon_url = OC::$WEBROOT . "/index.php/core/preview.png?x=200&y=200&file=" . urlencode($path);
+		} else {
+			$icon_url = \OC::$server->getMimeTypeDetector()->mimeTypeIcon( $mimetype );
+		}
 
 		// File not found		
-		if ( \OC\Files\Filesystem::is_file( $path ) == false ) {
-			$fileinfo['name'] = "File not found.";
+		if ( $view->is_file( $path ) == false ) {
+			$name = "File not found.";
 			$download_url = "#";
 		}
 		
 		$result = array(
-			"type" => $attachment['type'],
-			"mimetype"	=> $fileinfo['mimetype'],
-			"name"		=> $fileinfo['name'],
+			"type" => $type,
+			"mimetype"	=> $mimetype,
+			"name"		=> $name,
 			"path"		=> $path,
-			"download_url"	=> $download_url
+			"download_url"	=> $download_url,
+			"icon_url" => $icon_url			
 		);
+
 		return $result;
-	}
+	}		
 
 	/*
 	Share item if not already done */
@@ -323,84 +381,39 @@ class OC_Conversations
 		$room = self::getRoom();
 		$room = explode(":", $room);
 
-		$item_shared = self::isItemSharedWithGroup( true, 'file', $attachment['owner'], urldecode($attachment['path']) );
-		if ( ! $item_shared ) {
+		$isShared = self::isItemShared($attachment['fileid']);
+		if ( ! $isShared ) {
 			$share_type = ( $room[0] == "group" ) ? OCP\Share::SHARE_TYPE_GROUP : OCP\Share::SHARE_TYPE_USER;
 			\OCP\Share::shareItem('file', $attachment['fileid'], $share_type, $room[1], 17);
 		}
 	}
 
 	/*
-	Test if item is shared with a group */
-	private static function isItemSharedWithGroup($recursiv, $type, $owner, $path) {	
-		if ( empty($path) || $path == "files" ) 
-			return false;
-		\OC_Util::setupFS($owner);
-		\OC\Files\Filesystem::initMountPoints($owner);
-		$view = new \OC\Files\View('/' . $owner . '/files');
-		$fileinfo = $view->getFileInfo( substr($path, strpos($path, "/") ) ); //get fileinfo from path (remove root folder)
-		
-		$share_with = self::getRoom();
-		$share_with = explode(":", $share_with);
+	test if item is shared with current user(s) in room by its fileid */
+	public static function isItemShared($fileid) {	
+		$room = self::getRoom();
+		$room = explode(":", $room);
+		$userId = OC_User::getUser();
+		$isShared = true;
+		$view = new \OC\Files\View('/' . $userId . '/files');
 
-		$share_type = ( $share_with[0] == "group" ) ? OCP\Share::SHARE_TYPE_GROUP : OCP\Share::SHARE_TYPE_USER;
+		$path = $view->getPath( $fileid );
+		$owner = $view->getOwner($path);
 
-		$query = \OC_DB::prepare( 'SELECT `file_target`, `permissions`, `expiration`
-									FROM `*PREFIX*share`
-									WHERE `share_type` = ? AND `item_source` = ? AND `item_type` = ? AND `share_with` = ?' );
-
-		$result = $query->execute( array($share_type, $fileinfo['fileid'], $type, $share_with[1]) )->fetchAll();
-
-		/*
-		if ( count($result) == 0 ) { // item not shared, is parent folder shared?
-			$parent_path = substr($fileinfo['path'], 0, strrpos($fileinfo['path'], "/") );					
-			return self::isItemSharedWithGroup( 'folder', $owner, $parent_path );
-		}
-		return true;
-		*/
-		if ( count($result) == 0 ) { // item not shared, is parent folder shared?
-			if ( $recursiv ) {
-				$parent_path = substr($fileinfo['path'], 0, strrpos($fileinfo['path'], "/") );					
-				return self::isItemSharedWithGroup(true, 'folder', $owner, $parent_path );
-			} else {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/*
-	Get shared path for inherited shared item */
-	private static function getInheritedSharedPath($owner, $path) {
-		$shared_path = substr($path, strrpos($path, "/")+1 ); // filename
-		do {
-			$path = substr($path, 0, strrpos($path, "/") ); // parent path
-			$shared_path = substr($path, strrpos($path, "/")+1 ) . "/" . $shared_path; // shared path + parent folder
-			if ( empty($path) || $path == "files" ) break;
-		} while ( ! self::isItemSharedWithGroup(false, 'folder', $owner, $path) );
-
-		return $shared_path;
-	}
-
-	/*
-	Get user avatar from OC */
-	public static $avatars = array();
-	public static function getUserAvatar( $user )
-	{
-		if ( ! array_key_exists($user, self::$avatars) ) {
-			$avatar = New OC_Avatar($user);
-			$image = $avatar->get(32);
-			if ($image instanceof OC_Image) {
-				$imageUrl = OC_Helper::linkToRoute ( 'core_avatar_get', array ('user' => $user, 'size' => 32) ) . '?requesttoken='. OC::$session->get('requesttoken');
-				self::$avatars[$user] = $imageUrl;
-			} else {
-				self::$avatars[$user] = '';
+		$userSharingFile = OCP\Share::getUsersSharingFile( $path, $owner );
+		if ( $room[0] == "group" ) {
+			foreach (OC_Group::usersInGroup($room[1]) as $user) {
+				if ( $owner != $room && ! in_array($user, $userSharingFile["users"]) ) {
+					$isShared = false;
+				}
+			}	
+		} else {
+			if ( $owner != $room[1] && !in_array($room[1],  $userSharingFile["users"] ) ) {
+				$isShared = false;
 			}
 		}
 
-		if ( self::$avatars[$user] != '' )
-			return self::$avatars[$user];
-		return '';
+		return $isShared;
 	}
 
 	/*
@@ -408,5 +421,23 @@ class OC_Conversations
 	public static function changeUserGroup( $args ) {
 		$query = OCP\DB::prepare('DELETE FROM *PREFIX*preferences WHERE userid = ? AND appid = "conversations" AND configkey = "activeRoom"');
 		$query->execute( array( $args['uid'] ));
+	}
+
+	public static function hook_login($uid) {
+		self::updateUserOnlineStatus( $uid['uid'] );
+	}
+
+	public static function hook_logout() {
+		$uid = OC_User::getUser();
+		self::updateUserOnlineStatus( $uid, "offline" );
+	}
+
+	public static function updateUserOnlineStatus($uid, $value="online") {
+		$conf = OCP\Config::getUserValue( $uid, 'conversations', 'conf', false );
+		$conf = ( ! $conf ) ? array() : unserialize( $conf );
+		$conf["onlinestatus"] = $value;
+		$conf["lastupdate"] = time();
+
+		OCP\Config::setUserValue( $uid, 'conversations', 'conf', serialize($conf));
 	}
 }
